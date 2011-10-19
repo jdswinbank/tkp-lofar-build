@@ -2,10 +2,16 @@
 
 BUILDROOT=/var/scratch
 CASARESTROOT=$BUILDROOT/casarest
-INSTALLROOT=/opt/casarest
+INSTALLROOT=/opt
 
 update="1"
-remove_old=""
+
+install_symlink() {
+    echo "Updating default symlink."
+    rm $INSTALLROOT/archive/casarest/default
+    ln -s $INSTALLROOT/archive/casarest/r$1 $INSTALLROOT/archive/casarest/default
+    echo "Using casarest r$1."
+}
 
 while getopts al optionName
 do
@@ -22,15 +28,27 @@ then
     echo "Updating casarest sources."
     git clean -df
     git svn rebase
+    if [ $REVISION ]
+    then
+        echo "Checking out r$REVISION."
+        git checkout `git svn find-rev r$REVISION`
+    fi
 else
     echo "Not updating casarest sources."
 fi
 CASAREST_VER=`git svn find-rev HEAD`
+if [ -d $INSTALLROOT/archive/casarest/r$CASAREST_VER ]
+then
+    echo "Already at the latest version."
+    install_symlink $CASAREST_VER
+    echo "Done."
+    exit 0
+fi
 
 echo "Configuring."
 mkdir -p $CASARESTROOT/build
 cd $CASARESTROOT/build
-cmake -DCASACORE_ROOT_DIR=/usr/local -DCMAKE_INSTALL_PREFIX=$INSTALLROOT/casarest-`date +%Y-%m-%d` $CASARESTROOT
+cmake -DWCSLIB_INCLUDE_DIR=/opt/wcslib/include -DWCSLIB_LIBRARY=/opt/wcslib/lib/libwcs.so -DCASACORE_ROOT_DIR=/opt/casacore -DCMAKE_INSTALL_PREFIX=$INSTALLROOT/archive/casarest/r$CASAREST_VER $CASARESTROOT
 
 echo "Building."
 make -j8
@@ -50,20 +68,6 @@ then
     exit 1
 fi
 
-echo "Updating default symlink."
-rm $INSTALLROOT/casarest
-ln -s $INSTALLROOT/casarest-`date +%Y-%m-%d` $INSTALLROOT/casarest
+install_symlink $CASAREST_VER
 
-if [ $remove_old ]
-then
-    old_date=`date --date="1 month ago" +%Y-%m-%d`
-    old_build=$INSTALLROOT/casarest-$old_date
-    if [ -d $old_build ]
-    then
-        echo "Removing build from $old_date."
-        rm -rf $old_build
-    fi
-fi
-
-echo "Using Casarest r$CASAREST_VER."
 echo "Done."

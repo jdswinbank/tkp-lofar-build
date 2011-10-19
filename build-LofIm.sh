@@ -3,10 +3,16 @@
 #BUILDROOT=/zfs/heastro-plex/scratch/swinbank/build
 BUILDROOT=/var/scratch
 LOFARROOT=$BUILDROOT/LOFAR
-INSTALLROOT=/opt/LofIm
+INSTALLROOT=/opt
 
 update_lofar="1"
-remove_old=""
+
+install_symlink() {
+    echo "Updating default symlink."
+    rm $INSTALLROOT/archive/lofim/default
+    ln -s $INSTALLROOT/archive/lofim/r$1 $INSTALLROOT/archive/lofim/default
+    echo "Using casacore r$1."
+}
 
 while getopts al optionName
 do
@@ -23,6 +29,11 @@ then
     echo "Updating LOFAR sources."
     git clean -df
     git svn rebase
+    if [ $REVISION ]
+    then
+        echo "Checking out r$REVISION."
+        git checkout `git svn find-rev r$REVISION`
+    fi
 else
     echo "Not updating LOFAR sources."
 fi
@@ -41,10 +52,18 @@ do
   rsync -tvvr --exclude=.svn lfe001:/opt/LofIm/daily/$CLUSTERBUILD/lofar/LOFAR/CEP/Imager/ASKAPsoft/$path/ $LOFARROOT/CEP/Imager/ASKAPsoft/$path
 done
 
+if [ -d $INSTALLROOT/archive/lofim/r$LOFARVER ]
+then
+    echo "Requested build already available."
+    install_symlink $LOFARVER
+    echo "Done."
+    exit 0
+fi
+
 echo "Configuring."
 mkdir -p $LOFARROOT/build/gnu_opt
 cd $LOFARROOT/build/gnu_opt
-cmake -DCASAREST_ROOT_DIR=/opt/casarest/casarest -DBUILD_SHARED_LIBS=ON -DBUILD_PACKAGES="Offline" -DCMAKE_INSTALL_PREFIX=$INSTALLROOT/lofar-`date +%Y-%m-%d` $LOFARROOT
+cmake -DCASACORE_ROOT_DIR=/opt/casacore -DWCSLIB_ROOT_DIR=/opt/wcslib -DCASAREST_ROOT_DIR=/opt/casarest -DBUILD_SHARED_LIBS=ON -DBUILD_PACKAGES="Offline" -DCMAKE_INSTALL_PREFIX=$INSTALLROOT/archive/lofim/r$LOFARVER $LOFARROOT
 
 echo "Building."
 make -j8
@@ -64,20 +83,6 @@ then
     exit 1
 fi
 
-echo "Updating default symlink."
-rm $INSTALLROOT/lofar
-ln -s $INSTALLROOT/lofar-`date +%Y-%m-%d` $INSTALLROOT/lofar
+install_symlink $LOFARVER
 
-if [ $remove_old ]
-then
-    old_date=`date --date="1 month ago" +%Y-%m-%d`
-    old_build=$INSTALLROOT/lofar-$old_date
-    if [ -d $old_build ]
-    then
-        echo "Removing build from $old_date."
-        rm -rf $old_build
-    fi
-fi
-
-echo "Using LOFARsoft r$LOFARVER."
 echo "Done."

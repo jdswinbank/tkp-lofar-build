@@ -3,9 +3,16 @@
 BUILDROOT=/var/scratch
 CASACOREROOT=$BUILDROOT/casacore
 INSTALLROOT=/opt
+#REVISION=21123
 
 update="1"
-remove_old=""
+
+install_symlink() {
+    echo "Updating default symlink."
+    rm $INSTALLROOT/archive/casacore/default
+    ln -s $INSTALLROOT/archive/casacore/r$1 $INSTALLROOT/archive/casacore/default
+    echo "Using casacore r$1."
+}
 
 while getopts al optionName
 do
@@ -22,19 +29,26 @@ then
     echo "Updating casacore sources."
     git clean -df
     git svn rebase
+    if [ $REVISION ]
+    then
+        echo "Checking out r$REVISION."
+        git checkout `git svn find-rev r$REVISION`
+    fi
 else
     echo "Not updating casarest sources."
 fi
 CASACORE_VER=`git svn find-rev HEAD`
 if [ -d $INSTALLROOT/archive/casacore/r$CASACORE_VER ]
 then
-    echo "Already at the latest version."
+    echo "Requested build already available."
+    install_symlink $CASACORE_VER
+    echo "Done."
     exit 0
 fi
 
 echo "Configuring."
 mkdir -p $CASACOREROOT/build/opt
-cd $CASARESTROOT/build/opt
+cd $CASACOREROOT/build/opt
 cmake -DCMAKE_INSTALL_PREFIX=/$INSTALLROOT/archive/casacore/r$CASACORE_VER -DUSE_HDF5=OFF -DWCSLIB_ROOT_DIR=/opt/wcslib -DWCSLIB_INCLUDE_DIR=/opt/wcslib/include -DWCSLIB_LIBRARY=/opt/wcslib/lib/libwcs.so -DDATA_DIR=/opt/measures/data ../..
 
 echo "Building."
@@ -55,9 +69,6 @@ then
     exit 1
 fi
 
-echo "Updating default symlink."
-rm $INSTALLROOT/casacore
-ln -s $INSTALLROOT/archive/casacore/r$CASACORE_VER $INSTALLROOT/casacore
+install_symlink $CASACORE_VER
 
-echo "Using casacore r$CASAREST_VER."
 echo "Done."
