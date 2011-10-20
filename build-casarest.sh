@@ -3,8 +3,11 @@
 BUILDROOT=/var/scratch
 CASARESTROOT=$BUILDROOT/casarest
 INSTALLROOT=/opt
+#REVISION=""
 
 update="1"
+
+. `dirname ${0}`/utils.sh
 
 install_symlink() {
     echo "Updating default symlink."
@@ -52,21 +55,11 @@ cmake -DWCSLIB_INCLUDE_DIR=/opt/wcslib/include -DWCSLIB_LIBRARY=/opt/wcslib/lib/
 
 echo "Building."
 make -j8
-result=$?
-if [ $result -ne 0 ]
-then
-    echo "Build failed! (Returned value $result)"
-    exit 1
-fi
+check_result "casarest" "make" $?
 
 echo "Installing."
 make install
-result=$?
-if [ $result -ne 0 ]
-then
-    echo "Installation failed! (Returned value $result)"
-    exit 1
-fi
+check_result "casarest" "make install" $?
 
 install_symlink $CASAREST_VER
 

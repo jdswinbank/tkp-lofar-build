@@ -1,11 +1,12 @@
 #!/bin/sh
 
-#BUILDROOT=/zfs/heastro-plex/scratch/swinbank/build
 BUILDROOT=/var/scratch
 LOFARROOT=$BUILDROOT/LOFAR
 INSTALLROOT=/opt
 
 update_lofar="1"
+
+. `dirname ${0}`/utils.sh
 
 install_symlink() {
     echo "Updating default symlink."
@@ -67,21 +68,11 @@ cmake -DCASACORE_ROOT_DIR=/opt/casacore -DWCSLIB_ROOT_DIR=/opt/wcslib -DCASAREST
 
 echo "Building."
 make -j8
-result=$?
-if [ $result -ne 0 ]
-then
-    echo "Build failed! (Returned value $result)"
-    exit 1
-fi
+check_result "LofIm" "make" $?
 
 echo "Installing."
 make install
-result=$?
-if [ $result -ne 0 ]
-then
-    echo "Installation failed! (Returned value $result)"
-    exit 1
-fi
+check_result "LofIm" "make install" $?
 
 install_symlink $LOFARVER
 

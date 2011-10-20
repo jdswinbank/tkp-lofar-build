@@ -7,12 +7,15 @@ INSTALLROOT=/opt
 
 update="1"
 
+. `dirname ${0}`/utils.sh
+
 install_symlink() {
     echo "Updating default symlink."
     rm $INSTALLROOT/archive/casacore/default
     ln -s $INSTALLROOT/archive/casacore/r$1 $INSTALLROOT/archive/casacore/default
     echo "Using casacore r$1."
 }
+
 
 while getopts al optionName
 do
@@ -53,21 +56,11 @@ cmake -DCMAKE_INSTALL_PREFIX=/$INSTALLROOT/archive/casacore/r$CASACORE_VER -DUSE
 
 echo "Building."
 make -j8
-result=$?
-if [ $result -ne 0 ]
-then
-    echo "Build failed! (Returned value $result)."
-    exit 1
-fi
+check_result "casacore" "make" $?
 
 echo "Installing."
 make install
-result=$?
-if [ $result -ne 0 ]
-then
-    echo "Installation failed! (Returned value $result)."
-    exit 1
-fi
+check_result "casacore" "make install" $?
 
 install_symlink $CASACORE_VER
 
