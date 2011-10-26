@@ -1,9 +1,10 @@
 #!/bin/sh
 
-BUILDROOT=/var/scratch
-CASARESTROOT=$BUILDROOT/casarest
+CASARESTROOT=/var/scratch/casarest
 INSTALLROOT=/opt
-#REVISION=""
+
+WCSLIBROOT=/opt/wcslib
+CASACOREROOT=/opt/casacore
 
 update="1"
 
@@ -12,14 +13,23 @@ update="1"
 install_symlink() {
     echo "Updating default symlink."
     rm $INSTALLROOT/archive/casarest/default
-    ln -s $INSTALLROOT/archive/casarest/r$1 $INSTALLROOT/archive/casarest/default
+    ln -s $2 $INSTALLROOT/archive/casarest/default
     echo "Using casarest r$1."
 }
 
-while getopts al optionName
+# -l          -- update sources
+# -r <number> -- use specific revision
+# -f          -- force build, even if specified version already exists
+# -d          -- install this as default option
+# -s          -- suffix for install directory
+while getopts lr:s:fd optionName
 do
     case $optionName in
         l) update="";;
+        r) REVISION=$OPTARG;;
+        s) SUFFIX=$OPTARG;;
+        f) FORCE=1;;
+        d) DEFAULT=1;;
         \?) exit 1;;
     esac
 done
@@ -39,28 +49,33 @@ then
 else
     echo "Not updating casarest sources."
 fi
+
 CASAREST_VER=`git svn find-rev HEAD`
-if [ -d $INSTALLROOT/archive/casarest/r$CASAREST_VER ]
+INSTALL_DIRECTORY=$INSTALLROOT/archive/casarest/r$CASAREST_VER${SUFFIX:+-${SUFFIX}}
+
+# Only build if either -f was specified or the destination doesn't exist
+if [ $FORCE ] || [ ! -d $INSTALL_DIRECTORY ]
 then
+  echo "Configuring."
+  mkdir -p $CASARESTROOT/build
+  cd $CASARESTROOT/build
+  cmake -DWCSLIB_ROOT_DIR=$WCSLIBROOT -DCASACORE_ROOT_DIR=$CASACOREROOT -DCMAKE_INSTALL_PREFIX=$INSTALL_DIRECTORY $CASARESTROOT
+
+  echo "Building."
+  make -j8
+  check_result "casarest" "make" $?
+
+  echo "Installing."
+  make install
+  check_result "casarest" "make install" $?
+else
     echo "Already at the latest version."
-    install_symlink $CASAREST_VER
-    echo "Done."
-    exit 0
 fi
 
-echo "Configuring."
-mkdir -p $CASARESTROOT/build
-cd $CASARESTROOT/build
-cmake -DWCSLIB_INCLUDE_DIR=/opt/wcslib/include -DWCSLIB_LIBRARY=/opt/wcslib/lib/libwcs.so -DCASACORE_ROOT_DIR=/opt/casacore -DCMAKE_INSTALL_PREFIX=$INSTALLROOT/archive/casarest/r$CASAREST_VER $CASARESTROOT
-
-echo "Building."
-make -j8
-check_result "casarest" "make" $?
-
-echo "Installing."
-make install
-check_result "casarest" "make install" $?
-
-install_symlink $CASAREST_VER
+# If -d was specified, install this as the default version
+if [ $DEFAULT ]
+then
+  install_symlink $CASAREST_VER $INSTALL_DIRECTORY
+fi
 
 echo "Done."

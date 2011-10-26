@@ -1,31 +1,39 @@
 #!/bin/sh
 
-BUILDROOT=/var/scratch
-LOFARROOT=$BUILDROOT/LOFAR
+LOFARROOT=/var/scratch/LOFAR
 INSTALLROOT=/opt
 
-update_lofar="1"
+UPDATE="1"
 
 . `dirname ${0}`/utils.sh
 
 install_symlink() {
     echo "Updating default symlink."
     rm $INSTALLROOT/archive/lofim/default
-    ln -s $INSTALLROOT/archive/lofim/r$1 $INSTALLROOT/archive/lofim/default
-    echo "Using casacore r$1."
+    ln -s $2 $INSTALLROOT/archive/lofim/default
+    echo "Using LofIm r$1."
 }
 
-while getopts al optionName
+# -l          -- update sources
+# -r <number> -- use specific revision
+# -f          -- force build, even if specified version already exists
+# -d          -- install this as default option
+# -s          -- suffix for install directory
+while getopts lr:s:fd optionName
 do
     case $optionName in
-        l) update_lofar="";;
+        l) UPDATE="";;
+        r) REVISION=$OPTARG;;
+        s) SUFFIX=$OPTARG;;
+        f) FORCE=1;;
+        d) DEFAULT=1;;
         \?) exit 1;;
     esac
 done
 
 # Update LOFAR sources
 cd $LOFARROOT
-if [ $update_lofar ]
+if [ $UPDATE ]
 then
     echo "Updating LOFAR sources."
     git stash
@@ -40,12 +48,14 @@ then
 else
     echo "Not updating LOFAR sources."
 fi
+
 LOFARVER=`git svn find-rev HEAD`
+INSTALL_DIRECTORY=$INSTALLROOT/archive/lofim/r$LOFARVER${SUFFIX:+-${SUFFIX}}
 
 # Grab the version of ASKAPsoft used in the previous day's daily build on the
 # LOFAR cluster.
 echo "Inserting external ASKAPsoft dependencies."
-CLUSTERBUILD=`date --date="today" +%a`
+CLUSTERBUILD=`date --date="yesterday" +%a`
 for path in Base/accessors/src \
     Base/askap/src \
     Base/mwcommon/src \
@@ -57,34 +67,36 @@ do
   $LOFARROOT/CEP/Imager/ASKAPsoft/$path
 done
 
-if [ -d $INSTALLROOT/archive/lofim/r$LOFARVER ]
+# Only build if either -f was specified or the destination doesn't exist
+if [ $FORCE ] || [ ! -d $INSTALL_DIRECTORY ]
 then
-    echo "Requested build already available."
-    install_symlink $LOFARVER
-    echo "Done."
-    exit 0
+  echo "Configuring."
+  mkdir -p $LOFARROOT/build/gnu_opt
+  cd $LOFARROOT/build/gnu_opt
+        #-DBUILD_PACKAGES="pyparameterset BBSControl BBSTools ExpIon pystationresponse pyparmdb MWImager DPPP AOFlagger LofarStMan MSLofar Pipeline" \
+  cmake -DCASACORE_ROOT_DIR=/opt/casacore \
+        -DPYRAP_ROOT_DIR=/opt/pyrap       \
+        -DWCSLIB_ROOT_DIR=/opt/wcslib     \
+        -DCASAREST_ROOT_DIR=/opt/casarest \
+        -DBUILD_SHARED_LIBS=ON            \
+        -DBUILD_PACKAGES="Offline"        \
+        -DCMAKE_INSTALL_PREFIX=$INSTALLROOT/archive/lofim/r$LOFARVER \
+        $LOFARROOT
+
+  echo "Building."
+  make -j8
+  check_result "LofIm" "make" $?
+
+  echo "Installing."
+  make install
+  check_result "LofIm" "make install" $?
+else
+  echo "Requested build already available."
 fi
 
-echo "Configuring."
-mkdir -p $LOFARROOT/build/gnu_opt
-cd $LOFARROOT/build/gnu_opt
-cmake -DCASACORE_ROOT_DIR=/opt/casacore \
-      -DPYRAP_ROOT_DIR=/opt/pyrap       \
-      -DWCSLIB_ROOT_DIR=/opt/wcslib     \
-      -DCASAREST_ROOT_DIR=/opt/casarest \
-      -DBUILD_SHARED_LIBS=ON            \
-      -DBUILD_PACKAGES="Offline"        \
-      -DCMAKE_INSTALL_PREFIX=$INSTALLROOT/archive/lofim/r$LOFARVER \
-      $LOFARROOT
-
-echo "Building."
-make -j8
-check_result "LofIm" "make" $?
-
-echo "Installing."
-make install
-check_result "LofIm" "make install" $?
-
-install_symlink $LOFARVER
+if [ $DEFAULT ]
+then
+  install_symlink $LOFARVER $INSTALL_DIRECTORY
+fi
 
 echo "Done."

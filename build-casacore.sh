@@ -1,33 +1,42 @@
 #!/bin/sh
 
-BUILDROOT=/var/scratch
-CASACOREROOT=$BUILDROOT/casacore
+CASACOREROOT=/var/scratch/casacore
 INSTALLROOT=/opt
-#REVISION=21123
 
-update="1"
+WCSLIBROOT=/opt/wcslib
+DATADIR=/opt/measures/data
+
+UPDATE="1"
 
 . `dirname ${0}`/utils.sh
 
 install_symlink() {
     echo "Updating default symlink."
     rm $INSTALLROOT/archive/casacore/default
-    ln -s $INSTALLROOT/archive/casacore/r$1 $INSTALLROOT/archive/casacore/default
+    ln -s $2 $INSTALLROOT/archive/casacore/default
     echo "Using casacore r$1."
 }
 
-
-while getopts al optionName
+# -l          -- update sources
+# -r <number> -- use specific revision
+# -f          -- force build, even if specified version already exists
+# -d          -- install this as default option
+# -s          -- suffix for install directory
+while getopts lr:s:fd optionName
 do
     case $optionName in
-        l) update="";;
+        l) UPDATE="";;
+        r) REVISION=$OPTARG;;
+        s) SUFFIX=$OPTARG;;
+        f) FORCE=1;;
+        d) DEFAULT=1;;
         \?) exit 1;;
     esac
 done
 
 # Update source
 cd $CASACOREROOT
-if [ $update ]
+if [ $UPDATE ]
 then
     echo "Updating casacore sources."
     git clean -df
@@ -40,28 +49,35 @@ then
 else
     echo "Not updating casarest sources."
 fi
+
 CASACORE_VER=`git svn find-rev HEAD`
-if [ -d $INSTALLROOT/archive/casacore/r$CASACORE_VER ]
+INSTALL_DIRECTORY=$INSTALLROOT/archive/casacore/r$CASACORE_VER${SUFFIX:+-${SUFFIX}}
+
+# Only build if either -f was specified or the destination doesn't exist
+if [ $FORCE ] || [ ! -d $INSTALL_DIRECTORY ]
 then
-    echo "Requested build already available."
-    install_symlink $CASACORE_VER
-    echo "Done."
-    exit 0
+  echo "Configuring."
+  mkdir -p $CASACOREROOT/build/opt
+  cd $CASACOREROOT/build/opt
+  cmake -DCMAKE_INSTALL_PREFIX=$INSTALL_DIRECTORY -DUSE_HDF5=OFF -DWCSLIB_ROOT_DIR=$WCSLIBROOT -DDATA_DIR=$DATADIR ../..
+
+  echo "Building."
+  make -j8
+  check_result "casacore" "make" $?
+
+  echo "Installing."
+  make install
+  check_result "casacore" "make install" $?
+else
+  echo "Requested build already available."
 fi
 
-echo "Configuring."
-mkdir -p $CASACOREROOT/build/opt
-cd $CASACOREROOT/build/opt
-cmake -DCMAKE_INSTALL_PREFIX=/$INSTALLROOT/archive/casacore/r$CASACORE_VER -DUSE_HDF5=OFF -DWCSLIB_ROOT_DIR=/opt/wcslib -DWCSLIB_INCLUDE_DIR=/opt/wcslib/include -DWCSLIB_LIBRARY=/opt/wcslib/lib/libwcs.so -DDATA_DIR=/opt/measures/data ../..
+echo "Defaults is $DEFAULT"
 
-echo "Building."
-make -j8
-check_result "casacore" "make" $?
-
-echo "Installing."
-make install
-check_result "casacore" "make install" $?
-
-install_symlink $CASACORE_VER
+# If -d was specified, install this as the default version
+if [ $DEFAULT ]
+then
+  install_symlink $CASACORE_VER $INSTALL_DIRECTORY
+fi
 
 echo "Done."
