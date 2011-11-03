@@ -41,7 +41,7 @@ done
 ## Update & build casacore
 update_source "casacore" $CASACOREROOT $CASACORE_REVISION
 CASACORE_VERSION=$VERSION
-echo "Configuring casacore"
+echo "Configuring casacore r$CASACORE_VERSION."
 mkdir -p $CASACOREROOT/build/opt
 cd $CASACOREROOT/build/opt
 cmake -DCMAKE_INSTALL_PREFIX=$CASACORE_TARGET \
@@ -54,12 +54,12 @@ check_result "casacore" "make" $?
 echo "Installing casacore."
 make install
 check_result "casacore" "make install" $?
-echo "Built & installed casacore $CASACORE_VERSION."
+echo "Built & installed casacore r$CASACORE_VERSION."
 
 # Update & build casarest
 update_source "casarest" $CASARESTROOT $CASAREST_REVISION
 CASAREST_VERSION=$VERSION
-echo "Configuring casarest."
+echo "Configuring casarest r$CASAREST_VERSION."
 mkdir -p $CASARESTROOT/build
 cd $CASARESTROOT/build
 cmake -DWCSLIB_ROOT_DIR=$WCSLIBROOT         \
@@ -72,11 +72,12 @@ check_result "casarest" "make" $?
 echo "Installing casarest."
 make install
 check_result "casarest" "make install" $?
-echo "Built & installed casarest $CASAREST_VERSION."
+echo "Built & installed casarest r$CASAREST_VERSION."
 
 # Update & build pyrap
 update_source "pyrap" $PYRAPROOT $PYRAP_REVISION
-echo "Building & installing pyrap"
+PYRAP_VERSION=$VERSION
+echo "Building & installing pyrap r$PYRAP_VERSION."
 mkdir -p $PYRAP_PYTHON_TARGET
 cd $PYRAPROOT
 ./batchbuild-trunk.py --casacore-root=$CASACORE_TARGET \
@@ -84,6 +85,7 @@ cd $PYRAPROOT
     --prefix=$PYRAP_TARGET \
     --python-prefix=$PYRAP_PYTHON_TARGET
 check_result "pyrap" "batchbuild-trunk" $?
+echo "Built & installed pyrap r$PYRAP_VERSION."
 
 # Update LofIm, insert ASKAP dependencies, and build
 update_source "LofIm" $LOFARROOT $LOFAR_REVISION
@@ -103,7 +105,7 @@ do
   $LOFARROOT/CEP/Imager/ASKAPsoft/$path
 done
 
-echo "Configuring LofIm."
+echo "Configuring LofIm r$LOVAR_VERSION."
 mkdir -p $LOFARROOT/build/gnu_opt
 cd $LOFARROOT/build/gnu_opt
 cmake -DCASACORE_ROOT_DIR=$CASACORE_TARGET \
@@ -120,7 +122,7 @@ check_result "LofIm" "make" $?
 echo "Installing LofIm."
 make install
 check_result "LofIm" "make install" $?
-echo "Built & installed LofIm $LOFAR_VERSION."
+echo "Built & installed LofIm r$LOFAR_VERSION."
 
 echo "Generating init.sh."
 INITFILE=$TARGET/init.sh
