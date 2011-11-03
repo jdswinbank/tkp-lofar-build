@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Target directory for installation
-TARGET=/opt/archive/`date +%F-%H-%M-%S`
+TARGET=/opt/archive/`date +%F-%H-%M`
 echo "Installing into $TARGET."
 CASACORE_TARGET=$TARGET/casacore
 CASAREST_TARGET=$TARGET/casarest
