@@ -11,3 +11,21 @@ check_result() {
         exit 1
     fi
 }
+
+update_source() {
+    SOURCENAME=$1
+    SOURCEDIR=$2
+    REVISION=$3
+    cd $SOURCEDIR
+    echo "Updating $SOURCENAME sources."
+    git stash
+    git clean -df
+    git svn rebase
+    if [ $REVISION ]
+    then
+        echo "Checking out r$REVISION."
+        git checkout `git svn find-rev r$REVISION`
+    fi
+    git stash pop
+    VERSION=`git svn find-rev HEAD`
+}
