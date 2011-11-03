@@ -44,7 +44,10 @@ CASACORE_VERSION=$VERSION
 echo "Configuring casacore"
 mkdir -p $CASACOREROOT/build/opt
 cd $CASACOREROOT/build/opt
-cmake -DCMAKE_INSTALL_PREFIX=$CASACORE_TARGET -DUSE_HDF5=OFF -DWCSLIB_ROOT_DIR=$WCSLIBROOT -DDATA_DIR=$DATADIR $CASACOREROOT
+cmake -DCMAKE_INSTALL_PREFIX=$CASACORE_TARGET \
+    -DUSE_HDF5=OFF                            \
+    -DWCSLIB_ROOT_DIR=$WCSLIBROOT             \
+    -DDATA_DIR=$DATADIR $CASACOREROOT
 echo "Building casacore."
 make -j8
 check_result "casacore" "make" $?
@@ -59,7 +62,10 @@ CASAREST_VERSION=$VERSION
 echo "Configuring casarest."
 mkdir -p $CASARESTROOT/build
 cd $CASARESTROOT/build
-cmake -DWCSLIB_ROOT_DIR=$WCSLIBROOT -DCASACORE_ROOT_DIR=$CASACORE_TARGET -DCMAKE_INSTALL_PREFIX=$CASAREST_TARGET $CASARESTROOT
+cmake -DWCSLIB_ROOT_DIR=$WCSLIBROOT         \
+    -DCASACORE_ROOT_DIR=$CASACORE_TARGET    \
+    -DCMAKE_INSTALL_PREFIX=$CASAREST_TARGET \
+    $CASARESTROOT
 echo "Building casarest."
 make -j8
 check_result "casarest" "make" $?
