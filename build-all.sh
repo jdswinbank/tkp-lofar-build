@@ -152,11 +152,8 @@ ln -sf $INITFILE /opt/archive/init.sh
 
 # Install symlinks for backwards compatibility
 ln -sf $CASACORE_TARGET /opt/archive/casacore/default
-rm /opt/archive/casarest/default
 ln -sf $CASAREST_TARGET /opt/archive/casarest/default
-rm /opt/archive/pyrap/default
 ln -sf $PYRAP_TARGET /opt/archive/pyrap/default
-rm /opt/archive/lofim/default
 ln -sf $LOFAR_TARGET /opt/archive/lofim/default
 
 echo "Done."
