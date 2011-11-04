@@ -38,7 +38,7 @@ do
     esac
 done
 
-## Update & build casacore
+# Update & build casacore
 update_source "casacore" $CASACOREROOT $CASACORE_REVISION
 CASACORE_VERSION=$VERSION
 echo "Configuring casacore r$CASACORE_VERSION."
@@ -148,12 +148,17 @@ export PYTHONPATH=$PYRAP_PYTHON_TARGET\${PYTHONPATH:+:\${PYTHONPATH}}
 END
 
 # Install this build as the default
-ln -sf $INITFILE /opt/archive/init.sh
+rm /opt/archive/init.sh
+ln -s $INITFILE /opt/archive/init.sh
 
 # Install symlinks for backwards compatibility
-ln -sf $CASACORE_TARGET /opt/archive/casacore/default
-ln -sf $CASAREST_TARGET /opt/archive/casarest/default
-ln -sf $PYRAP_TARGET /opt/archive/pyrap/default
-ln -sf $LOFAR_TARGET /opt/archive/lofim/default
+rm /opt/archive/casacore/default
+ln -s $CASACORE_TARGET /opt/archive/casacore/default
+rm /opt/archive/casarest/default
+ln -s $CASAREST_TARGET /opt/archive/casarest/default
+rm /opt/archive/pyrap/default
+ln -s $PYRAP_TARGET /opt/archive/pyrap/default
+rm /opt/archive/lofim/default
+ln -s $LOFAR_TARGET /opt/archive/lofim/default
 
 echo "Done."
