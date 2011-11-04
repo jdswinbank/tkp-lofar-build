@@ -16,7 +16,7 @@ PYRAPROOT=/var/scratch/pyrap
 LOFARROOT=/var/scratch/LOFAR
 
 # LOFARSOFT packages to be built
-LOFARPACKAGES="Offline"
+LOFARPACKAGES="Offline LofarFT"
 #LOFARPACKAGES="pyparameterset BBSControl BBSTools ExpIon pystationresponse pyparmdb MWImager DPPP AOFlagger LofarStMan MSLofar Pipeline"
 
 # Locations of dependencies
