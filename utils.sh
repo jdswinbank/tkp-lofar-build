@@ -18,14 +18,16 @@ update_source() {
     REVISION=$3
     cd $SOURCEDIR
     echo "Updating $SOURCENAME sources."
-    git stash
     git clean -df
     git svn rebase
     if [ $REVISION ]
     then
         echo "Checking out r$REVISION."
         git checkout `git svn find-rev r$REVISION`
+        VERSION=$REVISION
+    else
+        git checkout -f master
+        # Take the version of the remote branch, ignoring local changes
+        VERSION=`git svn find-rev git-svn`
     fi
-    git stash pop
-    VERSION=`git svn find-rev HEAD`
 }

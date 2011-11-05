@@ -105,7 +105,9 @@ do
   $LOFARROOT/CEP/Imager/ASKAPsoft/$path
 done
 
-echo "Configuring LofIm r$LOVAR_VERSION."
+echo "Configuring LofIm r$LOFAR_VERSION."
+# First update the list of available LOFAR packages
+$LOFARROOT/CMake/gen_LofarPackageList_cmake.sh
 mkdir -p $LOFARROOT/build/gnu_opt
 cd $LOFARROOT/build/gnu_opt
 cmake -DCASACORE_ROOT_DIR=$CASACORE_TARGET \
