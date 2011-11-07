@@ -19,6 +19,7 @@ update_source() {
     cd $SOURCEDIR
     echo "Updating $SOURCENAME sources."
     git clean -df
+    git checkout -f master
     git svn rebase
     if [ $REVISION ]
     then
@@ -26,7 +27,6 @@ update_source() {
         git checkout `git svn find-rev r$REVISION`
         VERSION=$REVISION
     else
-        git checkout -f master
         # Take the version of the remote branch, ignoring local changes
         VERSION=`git svn find-rev git-svn`
     fi
