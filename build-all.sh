@@ -50,10 +50,10 @@ cmake -DCMAKE_INSTALL_PREFIX=$CASACORE_TARGET \
     -DDATA_DIR=$DATADIR $CASACOREROOT
 echo "Building casacore."
 make -j8
-check_result "casacore" "make" $?
+check_result "casacore" "make" $TARGET $?
 echo "Installing casacore."
 make install
-check_result "casacore" "make install" $?
+check_result "casacore" "make install" $TARGET $?
 echo "Built & installed casacore r$CASACORE_VERSION."
 
 # Update & build casarest
@@ -68,10 +68,10 @@ cmake -DWCSLIB_ROOT_DIR=$WCSLIBROOT         \
     $CASARESTROOT
 echo "Building casarest."
 make -j8
-check_result "casarest" "make" $?
+check_result "casarest" "make" $TARGET $?
 echo "Installing casarest."
 make install
-check_result "casarest" "make install" $?
+check_result "casarest" "make install" $TARGET $?
 echo "Built & installed casarest r$CASAREST_VERSION."
 
 # Update & build pyrap
@@ -84,7 +84,7 @@ cd $PYRAPROOT
     --wcs-root=$WCSLIBROOT \
     --prefix=$PYRAP_TARGET \
     --python-prefix=$PYRAP_PYTHON_TARGET
-check_result "pyrap" "batchbuild-trunk" $?
+check_result "pyrap" "batchbuild-trunk" $TARGET $?
 echo "Built & installed pyrap r$PYRAP_VERSION."
 
 # Update LofIm, insert ASKAP dependencies, and build
@@ -120,10 +120,10 @@ cmake -DCASACORE_ROOT_DIR=$CASACORE_TARGET \
     $LOFARROOT
 echo "Building LofIm."
 make -j8
-check_result "LofIm" "make" $?
+check_result "LofIm" "make" $TARGET $?
 echo "Installing LofIm."
 make install
-check_result "LofIm" "make install" $?
+check_result "LofIm" "make install" $TARGET $?
 echo "Built & installed LofIm r$LOFAR_VERSION."
 
 echo "Generating init.sh."

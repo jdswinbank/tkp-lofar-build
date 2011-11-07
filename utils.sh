@@ -3,11 +3,16 @@ send_mail() {
 }
 
 check_result() {
-    if [ $3 -ne 0 ]
+    COMPONENT=$1
+    STEP=$2
+    TARGET=$3
+    RESULT=$4
+    if [ $RESULT -ne 0 ]
     then
-        message="$2 failed: returned value $3"
+        message="$STEP failed: returned value $RESULT"
         echo $message
-        send_mail $1 $message
+        send_mail $COMPONENT $message
+        rm -rf $TARGET
         exit 1
     fi
 }
