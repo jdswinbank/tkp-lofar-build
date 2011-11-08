@@ -16,7 +16,7 @@ PYRAPROOT=/var/scratch/pyrap
 LOFARROOT=/var/scratch/LOFAR
 
 # LOFARSOFT packages to be built
-LOFARPACKAGES="Offline LofarFT"
+LOFARPACKAGES=Offline\;LofarFT
 #LOFARPACKAGES="pyparameterset BBSControl BBSTools ExpIon pystationresponse pyparmdb MWImager DPPP AOFlagger LofarStMan MSLofar Pipeline"
 
 # Locations of dependencies
@@ -27,7 +27,7 @@ DATADIR=/opt/measures/data
 . `dirname ${0}`/utils.sh
 
 # Optional command line arguments to specify revision to build.
-while getopts lr:s:fd optionName
+while getopts l:c:r:p: optionName
 do
     case $optionName in
         l) LOFAR_REVISION=$OPTARG;;
