@@ -15,6 +15,9 @@ CASARESTROOT=/var/scratch/casarest
 PYRAPROOT=/var/scratch/pyrap
 LOFARROOT=/var/scratch/LOFAR
 
+# Base directory for local patches
+PATCHES=$(cd $(dirname "$0"); pwd)
+
 # LOFARSOFT packages to be built
 LOFARPACKAGES=Offline\;LofarFT
 #LOFARPACKAGES="pyparameterset BBSControl BBSTools ExpIon pystationresponse pyparmdb MWImager DPPP AOFlagger LofarStMan MSLofar Pipeline"
@@ -103,6 +106,13 @@ do
   rsync -tvvr --exclude=.svn \
   lhn001:/opt/cep/LofIm/daily/$CLUSTERBUILD/lofar_build/LOFAR/CEP/Imager/ASKAPsoft/$path/ \
   $LOFARROOT/CEP/Imager/ASKAPsoft/$path
+done
+
+echo "Applying local patches."
+for patchfile in $PATCHES/lofar-patches/*patch
+do
+    echo $patchfile
+    git apply $patchfile
 done
 
 echo "Configuring LofIm r$LOFAR_VERSION."
