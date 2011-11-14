@@ -136,10 +136,13 @@ make install
 check_result "LofIm" "make install" $TARGET $?
 echo "Built & installed LofIm r$LOFAR_VERSION."
 
+echo "Copying cookbook tools to local host."
+rsync -r lhn001:/opt/cep/tools/cookbook $TARGET
+
 echo "Generating init.sh."
 INITFILE=$TARGET/init.sh
 cat > $INITFILE <<-END
-#wcslib
+# wcslib
 export LD_LIBRARY_PATH=$WCSLIBROOT/lib\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}
 export PATH=$WCSLIBROOT/bin\${PATH:+:\${PATH}}
 
@@ -154,6 +157,9 @@ export PATH=$CASAREST_TARGET/bin\${PATH:+:\${PATH}}
 # pyrap
 export LD_LIBRARY_PATH=$PYRAP_TARGET/lib\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}
 export PYTHONPATH=$PYRAP_PYTHON_TARGET\${PYTHONPATH:+:\${PYTHONPATH}}
+
+# cookbook tools
+export PATH=$TARGET/cookbook\${PATH:+:\${PATH}}
 
 # LofIm
 . $LOFAR_TARGET/lofarinit.sh
