@@ -1,0 +1,25 @@
+From e13e6fe26246367e61a164622176525fe35f9c81 Mon Sep 17 00:00:00 2001
+From: John Swinbank <swinbank@transientskp.org>
+Date: Mon, 14 Nov 2011 13:51:09 +0100
+Subject: [PATCH] Auto-add required linker dependencies for KernelControl
+
+---
+ CEP/Calibration/BBSControl/src/CMakeLists.txt |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/CEP/Calibration/BBSControl/src/CMakeLists.txt b/CEP/Calibration/BBSControl/src/CMakeLists.txt
+index a95e2dd..c754fde 100644
+--- a/CEP/Calibration/BBSControl/src/CMakeLists.txt
++++ b/CEP/Calibration/BBSControl/src/CMakeLists.txt
+@@ -41,6 +41,8 @@ lofar_add_bin_program(GlobalControl GlobalControl.cc)
+ lofar_add_bin_program(KernelControl KernelControl.cc)
+ lofar_add_bin_program(SolverControl SolverControl.cc)
+ 
++set_target_properties(KernelControl PROPERTIES LINK_FLAGS -Wl,--add-needed)
++
+ install(PROGRAMS
+   calibrate
+   calibrate-part
+-- 
+1.7.0.4
+
