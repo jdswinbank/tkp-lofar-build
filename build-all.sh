@@ -95,14 +95,13 @@ update_source "LofIm" $LOFARROOT $LOFAR_REVISION
 LOFAR_VERSION=$VERSION
 
 echo "Inserting external ASKAPsoft dependencies."
-CLUSTERBUILD=`date --date="yesterday" +%a`
+CLUSTERBUILD=`date --date="today" +%a`
 for path in Base/accessors/src \
     Base/askap/src \
     Base/mwcommon/src \
     Base/scimath/src \
     Components/Synthesis/synthesis/src
 do
-  #lfe001:/opt/LofIm/daily/$CLUSTERBUILD/lofar/LOFAR/CEP/Imager/ASKAPsoft/$path/
   rsync -tvvr --exclude=.svn \
   lhn001:/opt/cep/LofIm/daily/$CLUSTERBUILD/lofar_build/LOFAR/CEP/Imager/ASKAPsoft/$path/ \
   $LOFARROOT/CEP/Imager/ASKAPsoft/$path
