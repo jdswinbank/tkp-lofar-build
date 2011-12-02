@@ -1,0 +1,211 @@
+From f0200a3daabb05456c216c9e23798b8aa3fa39c3 Mon Sep 17 00:00:00 2001
+From: John Swinbank <swinbank@transientskp.org>
+Date: Fri, 2 Dec 2011 17:38:36 +0100
+Subject: [PATCH] Define local paths to beam table information
+
+---
+ LCS/MSLofar/src/CMakeLists.txt       |    2 +
+ LCS/MSLofar/src/makebeamtables.cc    |   85 ----------------------------------
+ LCS/MSLofar/src/makebeamtables.cc.cmake |   85 ++++++++++++++++++++++++++++++++++
+ 3 files changed, 87 insertions(+), 85 deletions(-)
+ delete mode 100644 LCS/MSLofar/src/makebeamtables.cc
+ create mode 100644 LCS/MSLofar/src/makebeamtables.cc.cmake
+
+diff --git a/LCS/MSLofar/src/CMakeLists.txt b/LCS/MSLofar/src/CMakeLists.txt
+index 3a3bd46..b661cdf 100644
+--- a/LCS/MSLofar/src/CMakeLists.txt
++++ b/LCS/MSLofar/src/CMakeLists.txt
+@@ -22,6 +22,8 @@ lofar_add_library(mslofar
+   BeamTables.cc
+ )
+ 
++configure_file(makebeamtables.cc.cmake makebeamtables.cc)
++
+ lofar_add_bin_program(versionmslofar versionmslofar.cc)
+ lofar_add_bin_program(makebeamtables makebeamtables.cc)
+ 
+diff --git a/LCS/MSLofar/src/makebeamtables.cc b/LCS/MSLofar/src/makebeamtables.cc
+deleted file mode 100644
+index cff12e4..0000000
+--- a/LCS/MSLofar/src/makebeamtables.cc
++++ /dev/null
+@@ -1,85 +0,0 @@
+-//# makebeamtables.cc: Program 
+-//# Copyright (C) 2011
+-//# ASTRON (Netherlands Institute for Radio Astronomy)
+-//# P.O.Box 2, 7990 AA Dwingeloo, The Netherlands
+-//#
+-//# This file is part of the LOFAR software suite.
+-//# The LOFAR software suite is free software: you can redistribute it and/or
+-//# modify it under the terms of the GNU General Public License as published
+-//# by the Free Software Foundation, either version 3 of the License, or
+-//# (at your option) any later version.
+-//#
+-//# The LOFAR software suite is distributed in the hope that it will be useful,
+-//# but WITHOUT ANY WARRANTY; without even the implied warranty of
+-//# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-//# GNU General Public License for more details.
+-//#
+-//# You should have received a copy of the GNU General Public License along
+-//# with the LOFAR software suite. If not, see <http://www.gnu.org/licenses/>.
+-//#
+-//# $Id$
+-//#
+-//# @author Ger van Diepen
+-
+-#include <lofar_config.h>
+-
+-#include <MSLofar/BeamTables.h>
+-#include <casa/Inputs.h>
+-#include <tables/Tables/ScalarColumn.h>
+-#include <ms/MeasurementSets/MeasurementSet.h>
+-
+-using namespace LOFAR;
+-using namespace casa;
+-
+-int main (int argc, char* argv[])
+-{
+-  try {
+-    Input inputs(1);
+-    // define the input structure
+-    inputs.version("2011Mar31-GvD");
+-    inputs.create ("ms", "",
+-		   "Name of MeasurementSet",
+-		   "string");
+-    inputs.create ("antennaset", "",
+-		   "Antenna set used (e.g. LBA_INNER)",
+-		   "string");
+-    inputs.create ("antennasetfile", "/opt/cep/lofar/share/AntennaSets.conf",
+-		   "Name of the AntennaSet file",
+-		   "string");
+-    inputs.create ("antennafielddir", "/opt/cep/lofar/share/AntennaFields",
+-		   "Directory where the AntennaField.conf files reside",
+-		   "string");
+-    inputs.create ("ihbadeltadir", "/opt/cep/lofar/share/iHBADeltas",
+-		   "Directory where the iHBADelta.conf files reside",
+-		   "string");
+-    inputs.create ("overwrite", "false",
+-                   "Overwriting existing beam subtables?"
+-                   "bool");
+-    inputs.readArguments (argc, argv);
+-    String msName      = inputs.getString("ms");
+-    String antSet      = inputs.getString("antennaset");
+-    String antSetFile  = inputs.getString("antennasetfile");
+-    String antFieldDir = inputs.getString("antennafielddir");
+-    String hbaDeltaDir = inputs.getString("ihbadeltadir");
+-    Bool   overwrite   = inputs.getBool  ("overwrite");
+-    MeasurementSet ms(msName, Table::Update);
+-     // If needed, try to get the AntennaSet name from the Observation table.
+-    if (antSet.empty()) {
+-      if (ms.observation().tableDesc().isColumn ("LOFAR_ANTENNA_SET")) {
+-        ROScalarColumn<String> antSetCol(ms.observation(), "LOFAR_ANTENNA_SET");
+-        antSet = antSetCol(0);
+-        LOG_DEBUG_STR ("Using AntennaSet " << antSet
+-                       << " from OBSERVATION subtable");
+-
+-      }
+-    }
+-    ASSERTSTR (!antSet.empty(), "No LOFAR_ANTENNA_SET found in OBSERVATION"
+-               " subtable of " << msName);
+-   BeamTables::create (ms, overwrite);
+-    BeamTables::fill   (ms, antSet, antSetFile, antFieldDir, hbaDeltaDir, true);
+-  } catch (std::exception& x) {
+-    cout << "Unexpected exception: " << x.what() << endl;
+-    return 1;
+-  }
+-  return 0;
+-}
+diff --git a/LCS/MSLofar/src/makebeamtables.cc.cmake b/LCS/MSLofar/src/makebeamtables.cc.cmake
+new file mode 100644
+index 0000000..2d3dc4c
+--- /dev/null
++++ b/LCS/MSLofar/src/makebeamtables.cc.cmake
+@@ -0,0 +1,85 @@
++//# makebeamtables.cc: Program
++//# Copyright (C) 2011
++//# ASTRON (Netherlands Institute for Radio Astronomy)
++//# P.O.Box 2, 7990 AA Dwingeloo, The Netherlands
++//#
++//# This file is part of the LOFAR software suite.
++//# The LOFAR software suite is free software: you can redistribute it and/or
++//# modify it under the terms of the GNU General Public License as published
++//# by the Free Software Foundation, either version 3 of the License, or
++//# (at your option) any later version.
++//#
++//# The LOFAR software suite is distributed in the hope that it will be useful,
++//# but WITHOUT ANY WARRANTY; without even the implied warranty of
++//# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++//# GNU General Public License for more details.
++//#
++//# You should have received a copy of the GNU General Public License along
++//# with the LOFAR software suite. If not, see <http://www.gnu.org/licenses/>.
++//#
++//# $Id$
++//#
++//# @author Ger van Diepen
++
++#include <lofar_config.h>
++
++#include <MSLofar/BeamTables.h>
++#include <casa/Inputs.h>
++#include <tables/Tables/ScalarColumn.h>
++#include <ms/MeasurementSets/MeasurementSet.h>
++
++using namespace LOFAR;
++using namespace casa;
++
++int main (int argc, char* argv[])
++{
++  try {
++    Input inputs(1);
++    // define the input structure
++    inputs.version("2011Mar31-GvD");
++    inputs.create ("ms", "",
++		   "Name of MeasurementSet",
++		   "string");
++    inputs.create ("antennaset", "",
++		   "Antenna set used (e.g. LBA_INNER)",
++		   "string");
++    inputs.create ("antennasetfile", "${CMAKE_INSTALL_PREFIX}/etc/AntennaSets.conf",
++		   "Name of the AntennaSet file",
++		   "string");
++    inputs.create ("antennafielddir", "${CMAKE_INSTALL_PREFIX}/etc/StaticMetaData/AntennaFields",
++		   "Directory where the AntennaField.conf files reside",
++		   "string");
++    inputs.create ("ihbadeltadir", "${CMAKE_INSTALL_PREFIX}/etc/StaticMetaData/AntennaFields",
++		   "Directory where the iHBADelta.conf files reside",
++		   "string");
++    inputs.create ("overwrite", "false",
++                   "Overwriting existing beam subtables?"
++                   "bool");
++    inputs.readArguments (argc, argv);
++    String msName      = inputs.getString("ms");
++    String antSet      = inputs.getString("antennaset");
++    String antSetFile  = inputs.getString("antennasetfile");
++    String antFieldDir = inputs.getString("antennafielddir");
++    String hbaDeltaDir = inputs.getString("ihbadeltadir");
++    Bool   overwrite   = inputs.getBool  ("overwrite");
++    MeasurementSet ms(msName, Table::Update);
++     // If needed, try to get the AntennaSet name from the Observation table.
++    if (antSet.empty()) {
++      if (ms.observation().tableDesc().isColumn ("LOFAR_ANTENNA_SET")) {
++        ROScalarColumn<String> antSetCol(ms.observation(), "LOFAR_ANTENNA_SET");
++        antSet = antSetCol(0);
++        LOG_DEBUG_STR ("Using AntennaSet " << antSet
++                       << " from OBSERVATION subtable");
++
++      }
++    }
++    ASSERTSTR (!antSet.empty(), "No LOFAR_ANTENNA_SET found in OBSERVATION"
++               " subtable of " << msName);
++   BeamTables::create (ms, overwrite);
++    BeamTables::fill   (ms, antSet, antSetFile, antFieldDir, hbaDeltaDir, true);
++  } catch (std::exception& x) {
++    cout << "Unexpected exception: " << x.what() << endl;
++    return 1;
++  }
++  return 0;
++}
+-- 
+1.7.7.3
+

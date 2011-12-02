@@ -1,0 +1,25 @@
+From b9a5781f03898cd5547936bfb89fd7992e2b2c97 Mon Sep 17 00:00:00 2001
+From: John Swinbank <swinbank@transientskp.org>
+Date: Fri, 2 Dec 2011 18:52:12 +0100
+Subject: [PATCH] Revert "Task #2681: Clean up Offline build"
+
+This reverts commit bcc5e717385b02d169a766e70e562a1e0ae0ca1d.
+---
+ SubSystems/Offline/CMakeLists.txt |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/SubSystems/Offline/CMakeLists.txt b/SubSystems/Offline/CMakeLists.txt
+index c0e0a39..963a993 100644
+--- a/SubSystems/Offline/CMakeLists.txt
++++ b/SubSystems/Offline/CMakeLists.txt
+@@ -1,5 +1,6 @@
+ # $Id$
+ 
+ lofar_package(Offline
+-  DEPENDS CEP MSLofar)
++  DEPENDS ASKAPsoft pyparameterset BBSControl BBSTools ExpIon pystationresponse
++  pyparmdb MWImager DPPP AOFlagger LofarStMan MSLofar Pipeline)
+ 
+-- 
+1.7.7.3
+
