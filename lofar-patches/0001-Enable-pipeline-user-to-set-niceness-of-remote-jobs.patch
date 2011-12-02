@@ -17,7 +17,7 @@ index 1d61993..10e3520 100644
  
 +    try:
 +        command = "nice --adjustment=%d %s" % (
-+            int(config.get('cluster', 'nicelevel')),
++            int(config.get('cluster', 'niceness')),
 +            command
 +        )
 +    except:
