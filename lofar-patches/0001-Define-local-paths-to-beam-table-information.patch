@@ -169,10 +169,10 @@ index 0000000..2d3dc4c
 +    inputs.create ("antennasetfile", "${CMAKE_INSTALL_PREFIX}/etc/AntennaSets.conf",
 +		   "Name of the AntennaSet file",
 +		   "string");
-+    inputs.create ("antennafielddir", "${CMAKE_INSTALL_PREFIX}/etc/StaticMetaData/AntennaFields",
++    inputs.create ("antennafielddir", "${CMAKE_INSTALL_PREFIX}/etc/StaticMetaData",
 +		   "Directory where the AntennaField.conf files reside",
 +		   "string");
-+    inputs.create ("ihbadeltadir", "${CMAKE_INSTALL_PREFIX}/etc/StaticMetaData/AntennaFields",
++    inputs.create ("ihbadeltadir", "${CMAKE_INSTALL_PREFIX}/etc/StaticMetaData",
 +		   "Directory where the iHBADelta.conf files reside",
 +		   "string");
 +    inputs.create ("overwrite", "false",
