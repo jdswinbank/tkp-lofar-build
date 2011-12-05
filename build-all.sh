@@ -112,6 +112,7 @@ for patchfile in $PATCHES/lofar-patches/*patch
 do
     echo $patchfile
     git apply $patchfile
+    check_result "LofIm" "git apply $patchfile" $TARGET $?
 done
 
 echo "Configuring LofIm r$LOFAR_VERSION."
