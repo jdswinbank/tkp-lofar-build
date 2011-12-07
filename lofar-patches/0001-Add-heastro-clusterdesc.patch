@@ -1,0 +1,34 @@
+From ad07e6401a183f590b36cb6503522cb00985a73f Mon Sep 17 00:00:00 2001
+From: John Swinbank <swinbank@transientskp.org>
+Date: Wed, 7 Dec 2011 17:00:14 +0100
+Subject: [PATCH] Add heastro clusterdesc
+
+---
+ LCS/Common/share/CMakeLists.txt      |    1 +
+ LCS/Common/share/heastro.clusterdesc |    4 ++++
+ 2 files changed, 5 insertions(+), 0 deletions(-)
+ create mode 100644 LCS/Common/share/heastro.clusterdesc
+
+diff --git a/LCS/Common/share/CMakeLists.txt b/LCS/Common/share/CMakeLists.txt
+index 3ac5a03..cb8d5bc 100644
+--- a/LCS/Common/share/CMakeLists.txt
++++ b/LCS/Common/share/CMakeLists.txt
+@@ -16,4 +16,5 @@ sub6.clusterdesc
+ sub7.clusterdesc
+ sub8.clusterdesc
+ local.clusterdesc
++heastro.clusterdesc
+ DESTINATION share)
+diff --git a/LCS/Common/share/heastro.clusterdesc b/LCS/Common/share/heastro.clusterdesc
+new file mode 100644
+index 0000000..3490b8d
+--- /dev/null
++++ b/LCS/Common/share/heastro.clusterdesc
+@@ -0,0 +1,4 @@
++ClusterName = heastro
++
++Compute.Nodes = [ heastro1 ]
++Compute.LocalDisks = [ / ]
+-- 
+1.7.7.3
+
