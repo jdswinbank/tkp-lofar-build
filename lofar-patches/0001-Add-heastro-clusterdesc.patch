@@ -1,12 +1,12 @@
-From ad07e6401a183f590b36cb6503522cb00985a73f Mon Sep 17 00:00:00 2001
+From cded619bedfedca77fda686617e4a6ee110521e1 Mon Sep 17 00:00:00 2001
 From: John Swinbank <swinbank@transientskp.org>
-Date: Wed, 7 Dec 2011 17:00:14 +0100
+Date: Fri, 9 Dec 2011 12:43:06 +0100
 Subject: [PATCH] Add heastro clusterdesc
 
 ---
  LCS/Common/share/CMakeLists.txt      |    1 +
- LCS/Common/share/heastro.clusterdesc |    4 ++++
- 2 files changed, 5 insertions(+), 0 deletions(-)
+ LCS/Common/share/heastro.clusterdesc |    5 +++++
+ 2 files changed, 6 insertions(+), 0 deletions(-)
  create mode 100644 LCS/Common/share/heastro.clusterdesc
 
 diff --git a/LCS/Common/share/CMakeLists.txt b/LCS/Common/share/CMakeLists.txt
@@ -21,14 +21,15 @@ index 3ac5a03..cb8d5bc 100644
  DESTINATION share)
 diff --git a/LCS/Common/share/heastro.clusterdesc b/LCS/Common/share/heastro.clusterdesc
 new file mode 100644
-index 0000000..3490b8d
+index 0000000..d4e71dd
 --- /dev/null
 +++ b/LCS/Common/share/heastro.clusterdesc
-@@ -0,0 +1,4 @@
+@@ -0,0 +1,5 @@
 +ClusterName = heastro
 +
 +Compute.Nodes = [ heastro1 ]
-+Compute.LocalDisks = [ / ]
++Compute.RemoteDisks = [ /home, /zfs/heastro-plex ]
++Compute.RemoteFileSys = [ heastro1:/home, heastro1:/zfs/heastro-plex ]
 -- 
 1.7.7.3
 
