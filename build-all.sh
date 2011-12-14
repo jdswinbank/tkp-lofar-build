@@ -139,6 +139,7 @@ echo "Built & installed LofIm r$LOFAR_VERSION."
 
 echo "Copying cookbook tools to local host."
 rsync -r lhn001:/opt/cep/tools/cookbook $TARGET
+check_result "Cookbook tools" "rsync" $TARGET $?
 
 echo "Generating init.sh."
 INITFILE=$TARGET/init.sh
