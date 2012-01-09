@@ -1,0 +1,75 @@
+From 984abd8eac4ea79788671751ada4c1da96366986 Mon Sep 17 00:00:00 2001
+From: John Swinbank <swinbank@transientskp.org>
+Date: Tue, 3 Jan 2012 15:37:57 +0100
+Subject: [PATCH] Don't assume an installation prefix when using pybdsm
+
+---
+ src/Anaamika/apps/PyBDSM/CMakeLists.txt |    4 +++-
+ src/Anaamika/apps/PyBDSM/pybdsm         |   14 --------------
+ src/Anaamika/apps/PyBDSM/pybdsm.cmake   |   22 ++++++++++++++++++++++
+ 3 files changed, 25 insertions(+), 15 deletions(-)
+ delete mode 100644 src/Anaamika/apps/PyBDSM/pybdsm
+ create mode 100644 src/Anaamika/apps/PyBDSM/pybdsm.cmake
+
+diff --git a/src/Anaamika/apps/PyBDSM/CMakeLists.txt b/src/Anaamika/apps/PyBDSM/CMakeLists.txt
+index 9344259..6d52d1c 100644
+--- a/src/Anaamika/apps/PyBDSM/CMakeLists.txt
++++ b/src/Anaamika/apps/PyBDSM/CMakeLists.txt
+@@ -1,3 +1,5 @@
+ # $Id: CMakeLists.txt 7906 2011-06-17 14:16:16Z loose $
+ 
+-install(FILES pybdsm DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
++configure_file(pybdsm.cmake pybdsm @ONLY)
++
++install(FILES ${CMAKE_BINARY_DIR}/apps/PyBDSM/pybdsm DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+diff --git a/src/Anaamika/apps/PyBDSM/pybdsm b/src/Anaamika/apps/PyBDSM/pybdsm
+deleted file mode 100644
+index d6c4442..0000000
+--- a/src/Anaamika/apps/PyBDSM/pybdsm
++++ /dev/null
+@@ -1,14 +0,0 @@
+-#!/bin/csh -f
+-#
+-# This script simply starts the interactive PyBDSM 
+-# IPython shell.
+-#
+-# Check whether called from CEPI/II. If so, init
+-# the Python libraries before calling PyBDSM.
+-if ( $?APS_LOCAL == 0 ) then
+-    exec python $LOFARSOFT/release/lib/python/bdsm/pybdsm.py 
+-else
+-    source ${APS_LOCAL}/login/alias
+-    use Pythonlibs
+-    exec python $LOFARSOFT/release/lib/python/bdsm/pybdsm.py
+-endif
+diff --git a/src/Anaamika/apps/PyBDSM/pybdsm.cmake b/src/Anaamika/apps/PyBDSM/pybdsm.cmake
+new file mode 100644
+index 0000000..890bdb3
+--- /dev/null
++++ b/src/Anaamika/apps/PyBDSM/pybdsm.cmake
+@@ -0,0 +1,22 @@
++#!/bin/bash
++#
++# This script simply starts the interactive PyBDSM
++# IPython shell.
++
++# Check whether called from CEPI/II. If so, init
++# the Python libraries before calling PyBDSM.
++if [ $APS_LOCAL ]; then
++    . ${APS_LOCAL}/login/alias.bash
++    use Pythonlibs
++fi
++
++# Add the LUS libraries to the relevant paths.
++if [ `uname` == "Darwin" ]; then
++    DYLD_FALLBACK_LIBRARY_PATH=@LUS_INSTALL_PREFIX@/lib${DYLD_FALLBACK_LIBRARY_PATH:+:${DYLD_FALLBACK_LIBRARY_PATH}}
++else
++    LD_LIBRARY_PATH=@LUS_INSTALL_PREFIX@/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
++fi
++PYTHONPATH=@LUS_INSTALL_PREFIX@/lib/python${PYTHONPATH:+:${PYTHONPATH}}
++
++# And execute pybdsm.py.
++exec @PYTHON_EXECUTABLE@ @LUS_INSTALL_PREFIX@/lib/python/bdsm/pybdsm.py
+-- 
+1.7.7.3
+
