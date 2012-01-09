@@ -1,0 +1,55 @@
+From 8976fb17d565254796484d85af43b9ea3560444c Mon Sep 17 00:00:00 2001
+From: John Swinbank <swinbank@transientskp.org>
+Date: Mon, 9 Jan 2012 16:02:54 +0100
+Subject: [PATCH] Enable propagation of CASACORE_ROOT_DIR
+
+---
+ CMakeOptions.cmake |    3 +++
+ src/CMakeLists.txt |   12 ++++++------
+ 2 files changed, 9 insertions(+), 6 deletions(-)
+
+diff --git a/CMakeOptions.cmake b/CMakeOptions.cmake
+index 1a67d40..d2e7d2c 100644
+--- a/CMakeOptions.cmake
++++ b/CMakeOptions.cmake
+@@ -17,6 +17,9 @@ set (LUS_ENABLE_DASHBOARD ${LUS_ENABLE_DASHBOARD} CACHE BOOL
+ set (HAVE_OPENMP ${OPENMP_FOUND} CACHE BOOL
+   "Does the compiler support OpenMP?")
+ 
++set (CASACORE_ROOT_DIR ${CASACORE_ROOT_DIR} CACHE PATH
++  "Root directory for casacore.")
++
+ ## === CR-Tools =================================================================
+ 
+ set (CR_WITH_DAL ${CR_WITH_DAL} CACHE BOOL
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 1f7e3e3..d6def66 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -7,17 +7,17 @@ include (ExternalProject)
+ ##
+ ## ==============================================================================
+ 
++## Locate common options
++
++find_file (LUS_CMAKE_OPTIONS CMakeOptions.cmake
++  PATHS ${PROJECT_BINARY_DIR}
++  )
++
+ ##____________________________________________________________________
+ ##                                                Macro: build_package
+ 
+ macro (build_package _packageName _packageSource)
+ 
+-  ## Locate common options
+-
+-  find_file (LUS_CMAKE_OPTIONS CMakeOptions.cmake
+-    PATHS ${PROJECT_BINARY_DIR}
+-    )
+-
+   ## get components of the path to the package's source code
+   get_filename_component (_packageLocation ${_packageSource} PATH)
+ 
+-- 
+1.7.7.3
+
