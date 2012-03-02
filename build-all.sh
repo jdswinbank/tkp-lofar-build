@@ -134,6 +134,7 @@ cmake -DCASACORE_ROOT_DIR=$CASACORE_TARGET \
     -DBUILD_PACKAGES=$LOFARPACKAGES        \
     -DCMAKE_INSTALL_PREFIX=$LOFAR_TARGET   \
     -DUSE_LOG4CPLUS=OFF                    \
+    -DUSE_OPENMP=ON                        \
     $LOFARROOT
 echo "Building LofIm."
 make -j8
