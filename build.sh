@@ -17,6 +17,9 @@ PELICAN_TARGET=$TARGET   #/pelican
 # Location of sources
 SOURCE=/home/swinbank/src
 
+# User & host for heastro1
+HEASTRO1=jds@heastro1.science.uva.nl
+
 # Locations of casacore measures data
 DATADIR=$TARGET/share/measures/data
 
@@ -25,6 +28,8 @@ LOFARPACKAGES=LofarStMan
 
 # Base directory for local patches
 PATCHES=$(cd $(dirname "$0"); pwd)
+
+mkdir -p $SOURCE
 
 # Download & build wcslib
 echo "Fetching wcslib"
@@ -68,7 +73,7 @@ wget -O- ftp://ftp.atnf.csiro.au/pub/software/measures_data/measures_data.tar.bz
 echo "Fetching casacore."
 cd $SOURCE
 if [ ! -d casacore ]; then
-    git clone heastro1.science.uva.nl:/var/scratch/casacore ./casacore
+    git clone ${HEASTRO1}:/var/scratch/casacore ./casacore
 fi
 cd casacore
 git checkout -f master
@@ -91,7 +96,7 @@ echo "Built & installed casacore"
 echo "Fetching casarest."
 cd $SOURCE
 if [ ! -d casarest ]; then
-    git clone heastro1.science.uva.nl:/var/scratch/casarest ./casarest
+    git clone ${HEASTRO1}:/var/scratch/casarest ./casarest
 fi
 cd casarest
 git checkout -f master
@@ -112,7 +117,7 @@ echo "Built & installed casarest"
 echo "Fetching LofIm."
 cd $SOURCE
 if [ ! -d LOFAR ]; then
-    git clone heastro1.science.uva.nl:/var/scratch/LOFAR ./LOFAR
+    git clone ${HEASTRO1}:/var/scratch/LOFAR ./LOFAR
 fi
 cd LOFAR
 git checkout -f master
@@ -165,6 +170,7 @@ rm -rf cppunit-1.12.1
 if [ ! -f cppunit-1.12.1.tar.gz ]; then
     wget http://downloads.sourceforge.net/cppunit/cppunit-1.12.1.tar.gz
 fi
+tar zxvf cppunit-1.12.1.tar.gz
 cd cppunit-1.12.1
 echo "Configuring CppUnit"
 ./configure --prefix=$CPPUNIT_TARGET
