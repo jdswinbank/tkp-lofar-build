@@ -1,214 +1,194 @@
 #!/bin/sh
 
-# Target directory for installation
-TARGET=/opt/archive/`date +%F-%H-%M`
-echo "Installing into $TARGET."
-CASACORE_TARGET=$TARGET/casacore
-CASAREST_TARGET=$TARGET/casarest
-PYRAP_TARGET=$TARGET/pyrap
-PYRAP_PYTHON_TARGET=$PYRAP_TARGET/lib/python2.6/dist-packages
-LOFAR_TARGET=$TARGET/LofIm
-LUS_TARGET=$TARGET/lus
+set -e
 
-# Locations of checked-out source
-CASACOREROOT=/var/scratch/casacore
-CASARESTROOT=/var/scratch/casarest
-PYRAPROOT=/var/scratch/pyrap
-LOFARROOT=/var/scratch/LOFAR
-LUSROOT=/var/scratch/lus
+# Target directory for installation
+TARGET=/home/swinbank/sw
+echo "Installing into $TARGET."
+WCSLIB_TARGET=$TARGET    #/wcslib
+CFITSIO_TARGET=$TARGET   #/cfitsio
+CASACORE_TARGET=$TARGET  #/casacore
+CASAREST_TARGET=$TARGET  #/casarest
+LOFAR_TARGET=$TARGET     #/LofIm
+QT_TARGET=$TARGET        #/qt
+CPPUNIT_TARGET=$TARGET   #/cppunit
+PELICAN_TARGET=$TARGET   #/pelican
+
+# Location of sources
+SOURCE=/home/swinbank/src
+
+# Locations of casacore measures data
+DATADIR=$TARGET/share/measures/data
+
+# LOFARSOFT packages to be built
+LOFARPACKAGES=LofarStMan
 
 # Base directory for local patches
 PATCHES=$(cd $(dirname "$0"); pwd)
 
-# LOFARSOFT packages to be built
-LOFARPACKAGES=Offline\;LofarFT\;Deployment\;SPW_Combine
-#LOFARPACKAGES="pyparameterset BBSControl BBSTools ExpIon pystationresponse pyparmdb MWImager DPPP AOFlagger LofarStMan MSLofar Pipeline"
+# Download & build wcslib
+echo "Fetching wcslib"
+cd $SOURCE
+rm -rf wcslib-4.13.4
+if [ ! -f wcslib-4.13.4.tar.bz2 ]; then
+    wget ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib-4.13.4.tar.bz2
+fi
+tar jxvf wcslib-4.13.4.tar.bz2
+echo "Configuring wcslib"
+cd wcslib-4.13.4
+mkdir -p $WCSLIB_TARGET
+./configure --prefix=$WCSLIB_TARGET
+echo "Building wcslib"
+make -j8
+echo "Installing wcslib"
+make install
 
-# LUS packages to be built
-LUSPACKAGES=anaamika
+# Download & build cfitsio
+echo "Fetching cfitsio"
+cd $SOURCE
+rm -rf cfitsio
+if [ ! -f cfitsio3290.tar.gz ]; then
+    wget ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3290.tar.gz
+fi
+tar zxvf cfitsio3290.tar.gz
+echo "Configuring cfitsio"
+cd cfitsio
+mkdir -p $CFITSIO_TARGET
+./configure --prefix=$CFITSIO_TARGET
+echo "Building cfitsio"
+make -j8 shared
+echo "Installing cfitsio"
+make install
 
-# Locations of dependencies
-WCSLIBROOT=/opt/archive/wcslib/4.8.2
-DATADIR=/opt/measures/data
-
-# Pull in some utility functions
-. `dirname ${0}`/utils.sh
-
-# Optional command line arguments to specify revision to build.
-while getopts l:c:r:p: optionName
-do
-    case $optionName in
-        l) LOFAR_REVISION=$OPTARG;;
-        c) CASACORE_REVISION=$OPTARG;;
-        r) CASAREST_REVISION=$OPTARG;;
-        p) PYRAP_REVISION=$OPTARG;;
-        u) LUS_REVISION=$OPTARG;;
-        \?) exit 1;;
-    esac
-done
+echo "Fetching measures data"
+mkdir -p `dirname $DATADIR`
+wget -O- ftp://ftp.atnf.csiro.au/pub/software/measures_data/measures_data.tar.bz2 | tar jxvC `dirname $DATADIR`
 
 # Update & build casacore
-update_source "casacore" $CASACOREROOT $CASACORE_REVISION
-CASACORE_VERSION=$VERSION
-echo "Configuring casacore r$CASACORE_VERSION."
-mkdir -p $CASACOREROOT/build/opt
-cd $CASACOREROOT/build/opt
+echo "Fetching casacore."
+cd $SOURCE
+if [ ! -d casacore ]; then
+    git clone heastro1.science.uva.nl:/var/scratch/casacore ./casacore
+fi
+cd casacore
+git checkout -f master
+git clean -dfx
+echo "Configuring casacore."
+mkdir -p $SOURCE/casacore/build/opt
+cd $SOURCE/casacore/build/opt
 cmake -DCMAKE_INSTALL_PREFIX=$CASACORE_TARGET \
     -DUSE_HDF5=OFF                            \
-    -DWCSLIB_ROOT_DIR=$WCSLIBROOT             \
-    -DDATA_DIR=$DATADIR $CASACOREROOT
+    -DWCSLIB_ROOT_DIR=$WCSLIB_TARGET          \
+    -DCFITSIO_ROOT_DOR=$CFITSIO_TARGET        \
+    -DDATA_DIR=$DATADIR                       \
+    $SOURCE/casacore
 echo "Building casacore."
-make -j8
-check_result "casacore" "make" $TARGET $?
+make -j16
 echo "Installing casacore."
 make install
-check_result "casacore" "make install" $TARGET $?
-echo "Built & installed casacore r$CASACORE_VERSION."
+echo "Built & installed casacore"
 
-# Update & build casarest
-update_source "casarest" $CASARESTROOT $CASAREST_REVISION
-CASAREST_VERSION=$VERSION
-echo "Configuring casarest r$CASAREST_VERSION."
-mkdir -p $CASARESTROOT/build
-cd $CASARESTROOT/build
-cmake -DWCSLIB_ROOT_DIR=$WCSLIBROOT         \
+echo "Fetching casarest."
+cd $SOURCE
+if [ ! -d casarest ]; then
+    git clone heastro1.science.uva.nl:/var/scratch/casarest ./casarest
+fi
+cd casarest
+git checkout -f master
+git clean -dfx
+echo "Configuring casarest"
+mkdir -p $SOURCE/casarest/build
+cd $SOURCE/casarest/build
+cmake -DWCSLIB_ROOT_DIR=$WCSLIB_TARGET      \
     -DCASACORE_ROOT_DIR=$CASACORE_TARGET    \
     -DCMAKE_INSTALL_PREFIX=$CASAREST_TARGET \
-    $CASARESTROOT
+    $SOURCE/casarest
 echo "Building casarest."
-make -j8
-check_result "casarest" "make" $TARGET $?
+make -j16
 echo "Installing casarest."
 make install
-check_result "casarest" "make install" $TARGET $?
-echo "Built & installed casarest r$CASAREST_VERSION."
+echo "Built & installed casarest"
 
-# Update & build pyrap
-update_source "pyrap" $PYRAPROOT $PYRAP_REVISION
-PYRAP_VERSION=$VERSION
-echo "Building & installing pyrap r$PYRAP_VERSION."
-mkdir -p $PYRAP_PYTHON_TARGET
-cd $PYRAPROOT
-./batchbuild-trunk.py --casacore-root=$CASACORE_TARGET \
-    --wcs-root=$WCSLIBROOT \
-    --prefix=$PYRAP_TARGET \
-    --python-prefix=$PYRAP_PYTHON_TARGET
-check_result "pyrap" "batchbuild-trunk" $TARGET $?
-echo "Built & installed pyrap r$PYRAP_VERSION."
-
-# Update LofIm, insert ASKAP dependencies, and build
-update_source "LofIm" $LOFARROOT $LOFAR_REVISION
-LOFAR_VERSION=$VERSION
-
-echo "Inserting external ASKAPsoft dependencies."
-CLUSTERBUILD=`date --date="today" +%a`
-for path in Base/accessors/src \
-    Base/askap/src \
-    Base/mwcommon/src \
-    Base/scimath/src \
-    Components/Synthesis/synthesis/src
-do
-  rsync -tvvr --exclude=.svn \
-  lhn001:/opt/cep/LofIm/daily/$CLUSTERBUILD/lofar_build/LOFAR/CEP/Imager/ASKAPsoft/$path/ \
-  $LOFARROOT/CEP/Imager/ASKAPsoft/$path
-done
-
-echo "Applying local patches."
+echo "Fetching LofIm."
+cd $SOURCE
+if [ ! -d LOFAR ]; then
+    git clone heastro1.science.uva.nl:/var/scratch/LOFAR ./LOFAR
+fi
+cd LOFAR
+git checkout -f master
+git clean -dfx
+echo "Applying local patches to LofIm."
 for patchfile in $PATCHES/lofar-patches/*patch
 do
     echo $patchfile
     git apply $patchfile
-    check_result "LofIm" "git apply $patchfile" $TARGET $?
 done
 
-echo "Configuring LofIm r$LOFAR_VERSION."
+echo "Configuring LofIm."
 # First update the list of available LOFAR packages
-$LOFARROOT/CMake/gen_LofarPackageList_cmake.sh
-mkdir -p $LOFARROOT/build/gnu_opt
-cd $LOFARROOT/build/gnu_opt
+$SOURCE/LOFAR/CMake/gen_LofarPackageList_cmake.sh
+mkdir -p $SOURCE/LOFAR/build/gnu_opt
+cd $SOURCE/LOFAR/build/gnu_opt
 cmake -DCASACORE_ROOT_DIR=$CASACORE_TARGET \
-    -DPYRAP_ROOT_DIR=$PYRAP_TARGET         \
-    -DWCSLIB_ROOT_DIR=$WCSLIBROOT          \
+    -DWCSLIB_ROOT_DIR=$WCSLIB_TARGET       \
     -DCASAREST_ROOT_DIR=$CASAREST_TARGET   \
     -DBUILD_SHARED_LIBS=ON                 \
     -DBUILD_PACKAGES=$LOFARPACKAGES        \
     -DCMAKE_INSTALL_PREFIX=$LOFAR_TARGET   \
     -DUSE_LOG4CPLUS=OFF                    \
-    -DUSE_OPENMP=ON                        \
-    $LOFARROOT
+    $SOURCE/LOFAR
 echo "Building LofIm."
-make -j8
-check_result "LofIm" "make" $TARGET $?
+make -j16
 echo "Installing LofIm."
 make install
-check_result "LofIm" "make install" $TARGET $?
-echo "Built & installed LofIm r$LOFAR_VERSION."
+echo "Built & installed LofIm."
 
-echo "Copying cookbook tools to local host."
-rsync -r lhn001:/opt/cep/tools/cookbook $TARGET
-check_result "Cookbook tools" "rsync" $TARGET $?
+echo "Fetching Qt"
+cd $SOURCE
+rm -rf qt-everywhere-opensource-src-4.8.1
+if [ ! -f qt-everywhere-opensource-src-4.8.1.tar.gz ]; then
+    wget http://download.qt.nokia.com/qt/source/qt-everywhere-opensource-src-4.8.1.tar.gz
+fi
+tar zxvf qt-everywhere-opensource-src-4.8.1.tar.gz
+echo "Configuring Qt"
+cd qt-everywhere-opensource-src-4.8.1
+mkdir -p $QT_TARGET
+echo "yes" | ./configure -opensource -prefix $QT_TARGET
+echo "Building Qt"
+make -j16
+echo "Installing Qt"
+make install
 
-update_source "lus" $LUSROOT $LUS_REVISION
-LUS_VERSION=$VERSION
-echo "Applying local patches."
-for patchfile in $PATCHES/lus-patches/*patch
-do
-    echo $patchfile
-    git apply $patchfile
-    check_result "lus" "git apply $patchfile" $TARGET $?
-done
-echo "Configuring lus r$LUS_VERSION."
-cd $LUSROOT
-./bootstrap -DLUS_INSTALL_PREFIX=$LUS_TARGET -DCASACORE_ROOT_DIR=$CASACORE_TARGET -DWCSLIB_ROOT_DIR=$WCSLIBROOT -DWCSLIB_FORCE_BUILD=ON
-echo "Building & installing lus."
-cd $LUSROOT/build
-make -j8 $LUSPACKAGES
-check_result "lus" "make" $TARGET $?
-echo "Built & installed lus r$LUS_VERSION."
+echo "Fetching CppUnit"
+cd $SOURCE
+rm -rf cppunit-1.12.1
+if [ ! -f cppunit-1.12.1.tar.gz ]; then
+    wget http://downloads.sourceforge.net/cppunit/cppunit-1.12.1.tar.gz
+fi
+cd cppunit-1.12.1
+echo "Configuring CppUnit"
+./configure --prefix=$CPPUNIT_TARGET
+echo "Building CppUnit"
+make -j8
+echo "Installing CppUnit"
+make install
 
-echo "Generating init.sh."
-INITFILE=$TARGET/init.sh
-cat > $INITFILE <<-END
-# wcslib
-export LD_LIBRARY_PATH=$WCSLIBROOT/lib\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}
-export PATH=$WCSLIBROOT/bin\${PATH:+:\${PATH}}
-
-# casacore
-export LD_LIBRARY_PATH=$CASACORE_TARGET/lib\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}
-export PATH=$CASACORE_TARGET/bin\${PATH:+:\${PATH}}
-
-# casarest
-export LD_LIBRARY_PATH=$CASAREST_TARGET/lib\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}
-export PATH=$CASAREST_TARGET/bin\${PATH:+:\${PATH}}
-
-# pyrap
-export LD_LIBRARY_PATH=$PYRAP_TARGET/lib\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}
-export PYTHONPATH=$PYRAP_PYTHON_TARGET\${PYTHONPATH:+:\${PYTHONPATH}}
-
-# cookbook tools
-export PATH=$TARGET/cookbook\${PATH:+:\${PATH}}
-
-# lus
-# Anaamika (at least) handles its own library paths
-export PATH=$LUS_TARGET/bin\${PATH:+:\${PATH}}
-
-
-# LofIm
-. $LOFAR_TARGET/lofarinit.sh
-END
-
-# Install this build as the default
-rm /opt/archive/init.sh
-ln -s $INITFILE /opt/archive/init.sh
-
-# Install symlinks for backwards compatibility
-rm /opt/archive/casacore/default
-ln -s $CASACORE_TARGET /opt/archive/casacore/default
-rm /opt/archive/casarest/default
-ln -s $CASAREST_TARGET /opt/archive/casarest/default
-rm /opt/archive/pyrap/default
-ln -s $PYRAP_TARGET /opt/archive/pyrap/default
-rm /opt/archive/lofim/default
-ln -s $LOFAR_TARGET /opt/archive/lofim/default
+echo "Fetching Pelican"
+cd $SOURCE
+if [ ! -d pelican ]; then
+    git clone https://github.com/pelican/pelican.git
+fi
+cd pelican
+git checkout -f master
+git clean -dfx
+echo "Configuring Pelican"
+mkdir -p pelican/build
+cd pelican/build
+cmake -DCMAKE_BUILD_TYPE=release -DCMAKE_INSTALL_PREFIX=$PELICAN_TARGET ../CMakeLists.txt
+echo "Building pelican"
+cd ..
+make -j8
+echo "Installing pelican"
+make install
 
 echo "Done."
