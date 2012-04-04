@@ -65,6 +65,7 @@ make install
 check_result "casacore" "make install" $TARGET $?
 echo "Built & installed casacore r$CASACORE_VERSION."
 
+
 # Update & build casarest
 update_source "casarest" $CASARESTROOT $CASAREST_REVISION
 CASAREST_VERSION=$VERSION
