@@ -193,7 +193,12 @@ git clean -dfx
 echo "Configuring Pelican"
 mkdir -p pelican/build
 cd pelican/build
-cmake -DCMAKE_BUILD_TYPE=release -DCMAKE_INSTALL_PREFIX=$PELICAN_TARGET ../CMakeLists.txt
+PATH=$QT_TARGET/bin${PATH:+:$PATH}} cmake                 \
+    -DCMAKE_BUILD_TYPE=release                            \
+    -DCMAKE_INSTALL_PREFIX=$PELICAN_TARGET                \
+    -DCPPUNIT_INCLUDE_DIR=$CPPUNIT_TARGET/include/cppunit \
+    -DCPPUNIT_LIBRARIES=$CPPUNIT_TARGET/lib/libcppunit.so \
+    ../CMakeLists.txt
 echo "Building pelican"
 cd ..
 make -j${BUILD_JOBS}
