@@ -2,8 +2,11 @@
 
 set -e
 
+# User & host for heastro1. Required for cloning repositories.
+HEASTRO1=jds@heastro1.science.uva.nl
+
 # Target directory for installation
-TARGET=/home/swinbank/sw
+TARGET=${HOME}/sw
 echo "Installing into $TARGET."
 WCSLIB_TARGET=$TARGET    #/wcslib
 CFITSIO_TARGET=$TARGET   #/cfitsio
@@ -15,16 +18,16 @@ CPPUNIT_TARGET=$TARGET   #/cppunit
 PELICAN_TARGET=$TARGET   #/pelican
 
 # Location of sources
-SOURCE=/home/swinbank/src
-
-# User & host for heastro1
-HEASTRO1=jds@heastro1.science.uva.nl
+SOURCE=${HOME}/src
 
 # Locations of casacore measures data
 DATADIR=$TARGET/share/measures/data
 
 # LOFARSOFT packages to be built
 LOFARPACKAGES=LofarStMan
+
+# Number of simultaneous jobs
+BUILD_JOBS=16
 
 # Base directory for local patches
 PATCHES=$(cd $(dirname "$0"); pwd)
@@ -44,7 +47,7 @@ cd wcslib-4.13.4
 mkdir -p $WCSLIB_TARGET
 ./configure --prefix=$WCSLIB_TARGET
 echo "Building wcslib"
-make -j8
+make -j${BUILD_JOBS}
 echo "Installing wcslib"
 make install
 
@@ -61,7 +64,7 @@ cd cfitsio
 mkdir -p $CFITSIO_TARGET
 ./configure --prefix=$CFITSIO_TARGET
 echo "Building cfitsio"
-make -j8 shared
+make -j${BUILD_JOBS} shared
 echo "Installing cfitsio"
 make install
 
@@ -88,7 +91,7 @@ cmake -DCMAKE_INSTALL_PREFIX=$CASACORE_TARGET \
     -DDATA_DIR=$DATADIR                       \
     $SOURCE/casacore
 echo "Building casacore."
-make -j16
+make -j${BUILD_JOBS}
 echo "Installing casacore."
 make install
 echo "Built & installed casacore"
@@ -109,7 +112,7 @@ cmake -DWCSLIB_ROOT_DIR=$WCSLIB_TARGET      \
     -DCMAKE_INSTALL_PREFIX=$CASAREST_TARGET \
     $SOURCE/casarest
 echo "Building casarest."
-make -j16
+make -j${BUILD_JOBS}
 echo "Installing casarest."
 make install
 echo "Built & installed casarest"
@@ -143,7 +146,7 @@ cmake -DCASACORE_ROOT_DIR=$CASACORE_TARGET \
     -DUSE_LOG4CPLUS=OFF                    \
     $SOURCE/LOFAR
 echo "Building LofIm."
-make -j16
+make -j${BUILD_JOBS}
 echo "Installing LofIm."
 make install
 echo "Built & installed LofIm."
@@ -160,7 +163,7 @@ cd qt-everywhere-opensource-src-4.8.1
 mkdir -p $QT_TARGET
 echo "yes" | ./configure -opensource -prefix $QT_TARGET
 echo "Building Qt"
-make -j16
+make -j${BUILD_JOBS}
 echo "Installing Qt"
 make install
 
@@ -175,7 +178,7 @@ cd cppunit-1.12.1
 echo "Configuring CppUnit"
 ./configure --prefix=$CPPUNIT_TARGET
 echo "Building CppUnit"
-make -j8
+make -j${BUILD_JOBS}
 echo "Installing CppUnit"
 make install
 
@@ -193,7 +196,7 @@ cd pelican/build
 cmake -DCMAKE_BUILD_TYPE=release -DCMAKE_INSTALL_PREFIX=$PELICAN_TARGET ../CMakeLists.txt
 echo "Building pelican"
 cd ..
-make -j8
+make -j${BUILD_JOBS}
 echo "Installing pelican"
 make install
 
