@@ -193,9 +193,10 @@ export PATH=$TARGET/cookbook\${PATH:+:\${PATH}}
 # Anaamika (at least) handles its own library paths
 export PATH=$LUS_TARGET/bin\${PATH:+:\${PATH}}
 
-
 # LofIm
 . $LOFAR_TARGET/lofarinit.sh
+# Required to use gsm.py on heastro1
+export PYTHONPATH=/opt/monetdb/lib/python2.6/site-packages\${PYTHONPATH:+:\${PYTHONPATH}}
 END
 
 # Install this build as the default
