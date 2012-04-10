@@ -1,55 +1,51 @@
-From 8976fb17d565254796484d85af43b9ea3560444c Mon Sep 17 00:00:00 2001
+From 6388d3c44221dd2b5e436a33815538c3c4f4bd5c Mon Sep 17 00:00:00 2001
 From: John Swinbank <swinbank@transientskp.org>
-Date: Mon, 9 Jan 2012 16:02:54 +0100
+Date: Tue, 10 Apr 2012 09:50:20 +0200
 Subject: [PATCH] Enable propagation of CASACORE_ROOT_DIR
 
 ---
- CMakeOptions.cmake |    3 +++
- src/CMakeLists.txt |   12 ++++++------
- 2 files changed, 9 insertions(+), 6 deletions(-)
+ CMakeOptions.cmake |    4 ++++
+ src/CMakeLists.txt |   10 +++++-----
+ 2 files changed, 9 insertions(+), 5 deletions(-)
 
 diff --git a/CMakeOptions.cmake b/CMakeOptions.cmake
-index 1a67d40..d2e7d2c 100644
+index a30aac9..c0063dd 100644
 --- a/CMakeOptions.cmake
 +++ b/CMakeOptions.cmake
-@@ -17,6 +17,9 @@ set (LUS_ENABLE_DASHBOARD ${LUS_ENABLE_DASHBOARD} CACHE BOOL
+@@ -17,6 +17,10 @@ set (LUS_ENABLE_DASHBOARD ${LUS_ENABLE_DASHBOARD} CACHE BOOL
  set (HAVE_OPENMP ${OPENMP_FOUND} CACHE BOOL
    "Does the compiler support OpenMP?")
  
 +set (CASACORE_ROOT_DIR ${CASACORE_ROOT_DIR} CACHE PATH
-+  "Root directory for casacore.")
++  "Root directory for casacore."
++)
 +
- ## === CR-Tools =================================================================
+ ## === PyCRTools =================================================================
  
- set (CR_WITH_DAL ${CR_WITH_DAL} CACHE BOOL
+ set (PYCRTOOLS_ENABLE_TESTING ${PYCRTOOLS_ENABLE_TESTING} CACHE BOOL
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 1f7e3e3..d6def66 100644
+index 0948b41..6c29edd 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -7,17 +7,17 @@ include (ExternalProject)
- ##
- ## ==============================================================================
- 
-+## Locate common options
-+
-+find_file (LUS_CMAKE_OPTIONS CMakeOptions.cmake
-+  PATHS ${PROJECT_BINARY_DIR}
-+  )
-+
+@@ -10,13 +10,13 @@ include (ExternalProject)
  ##____________________________________________________________________
  ##                                                Macro: build_package
  
- macro (build_package _packageName _packageSource)
+-macro (build_package _packageName _packageSource)
++## Locate common options
  
 -  ## Locate common options
--
++find_file (LUS_CMAKE_OPTIONS CMakeOptions.cmake
++  PATHS ${PROJECT_BINARY_DIR}
++)
+ 
 -  find_file (LUS_CMAKE_OPTIONS CMakeOptions.cmake
 -    PATHS ${PROJECT_BINARY_DIR}
 -    )
--
++macro (build_package _packageName _packageSource)
+ 
    ## get components of the path to the package's source code
    get_filename_component (_packageLocation ${_packageSource} PATH)
- 
 -- 
-1.7.7.3
+1.7.9.5
 
