@@ -5,8 +5,11 @@ set -e
 # User & host for heastro1. Required for cloning repositories.
 HEASTRO1=jds@heastro1.science.uva.nl
 
+# Location of sources
+SOURCE=/var/scratch/swinbank/src
+
 # Target directory for installation
-TARGET=${HOME}/sw
+TARGET=/var/scratch/swinbank/sw
 echo "Installing into $TARGET."
 WCSLIB_TARGET=$TARGET    #/wcslib
 CFITSIO_TARGET=$TARGET   #/cfitsio
@@ -16,9 +19,6 @@ LOFAR_TARGET=$TARGET     #/LofIm
 QT_TARGET=$TARGET        #/qt
 CPPUNIT_TARGET=$TARGET   #/cppunit
 PELICAN_TARGET=$TARGET   #/pelican
-
-# Location of sources
-SOURCE=${HOME}/src
 
 # Locations of casacore measures data
 DATADIR=$TARGET/share/measures/data
