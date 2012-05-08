@@ -1,18 +1,18 @@
-From f0200a3daabb05456c216c9e23798b8aa3fa39c3 Mon Sep 17 00:00:00 2001
-From: John Swinbank <swinbank@transientskp.org>
-Date: Fri, 2 Dec 2011 17:38:36 +0100
+From 3d7e8693e3758101eebba63bdfa5c30805945662 Mon Sep 17 00:00:00 2001
+From: Tim Staley <tim.staley@soton.ac.uk>
+Date: Tue, 8 May 2012 12:44:16 +0100
 Subject: [PATCH] Define local paths to beam table information
 
 ---
- LCS/MSLofar/src/CMakeLists.txt       |    2 +
- LCS/MSLofar/src/makebeamtables.cc    |   85 ----------------------------------
- LCS/MSLofar/src/makebeamtables.cc.cmake |   85 ++++++++++++++++++++++++++++++++++
+ LCS/MSLofar/src/CMakeLists.txt          |    2 +
+ LCS/MSLofar/src/makebeamtables.cc       |   85 -------------------------------
+ LCS/MSLofar/src/makebeamtables.cc.cmake |   85 +++++++++++++++++++++++++++++++
  3 files changed, 87 insertions(+), 85 deletions(-)
  delete mode 100644 LCS/MSLofar/src/makebeamtables.cc
  create mode 100644 LCS/MSLofar/src/makebeamtables.cc.cmake
 
 diff --git a/LCS/MSLofar/src/CMakeLists.txt b/LCS/MSLofar/src/CMakeLists.txt
-index 3a3bd46..b661cdf 100644
+index 3a3bd46..e797b3f 100644
 --- a/LCS/MSLofar/src/CMakeLists.txt
 +++ b/LCS/MSLofar/src/CMakeLists.txt
 @@ -22,6 +22,8 @@ lofar_add_library(mslofar
@@ -26,7 +26,7 @@ index 3a3bd46..b661cdf 100644
  
 diff --git a/LCS/MSLofar/src/makebeamtables.cc b/LCS/MSLofar/src/makebeamtables.cc
 deleted file mode 100644
-index cff12e4..0000000
+index cee01ec..0000000
 --- a/LCS/MSLofar/src/makebeamtables.cc
 +++ /dev/null
 @@ -1,85 +0,0 @@
@@ -117,7 +117,7 @@ index cff12e4..0000000
 -}
 diff --git a/LCS/MSLofar/src/makebeamtables.cc.cmake b/LCS/MSLofar/src/makebeamtables.cc.cmake
 new file mode 100644
-index 0000000..2d3dc4c
+index 0000000..5439c37
 --- /dev/null
 +++ b/LCS/MSLofar/src/makebeamtables.cc.cmake
 @@ -0,0 +1,85 @@
@@ -207,5 +207,5 @@ index 0000000..2d3dc4c
 +  return 0;
 +}
 -- 
-1.7.7.3
+1.7.0.4
 
