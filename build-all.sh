@@ -25,7 +25,7 @@ LOFARPACKAGES=Offline\;LofarFT\;Deployment\;SPW_Combine
 #LOFARPACKAGES="pyparameterset BBSControl BBSTools ExpIon pystationresponse pyparmdb MWImager DPPP AOFlagger LofarStMan MSLofar Pipeline"
 
 # LUS packages to be built
-LUSPACKAGES=anaamika
+LUSPACKAGES=pybdsm
 
 # Locations of dependencies
 WCSLIBROOT=/opt/archive/wcslib/4.8.2
