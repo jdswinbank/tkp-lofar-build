@@ -1,0 +1,51 @@
+From c0e41ccba390d3a9c0719f6547b4c729d6e8378d Mon Sep 17 00:00:00 2001
+From: John Swinbank <swinbank@transientskp.org>
+Date: Wed, 23 May 2012 10:23:42 +0200
+Subject: [PATCH] Honour command line options
+
+---
+ cmake/FindCasaCore.cmake |    4 ++--
+ cmake/FindWcsLib.cmake   |    4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/cmake/FindCasaCore.cmake b/cmake/FindCasaCore.cmake
+index 654926c..eeaaba5 100644
+--- a/cmake/FindCasaCore.cmake
++++ b/cmake/FindCasaCore.cmake
+@@ -107,7 +107,7 @@ endmacro(casacore_resolve_dependencies _result)
+ macro(casacore_find_library _name)
+   string(TOUPPER ${_name} _NAME)
+   find_library(${_NAME}_LIBRARY ${_name}
+-    PATHS ${CASACORE_ROOT_DIR} PATH_SUFFIXES lib)
++    HINTS ${CASACORE_ROOT_DIR} PATH_SUFFIXES lib)
+   mark_as_advanced(${_NAME}_LIBRARY)
+   if(${_NAME}_LIBRARY)
+     list(APPEND CASACORE_LIBRARIES ${${_NAME}_LIBRARY})
+@@ -187,7 +187,7 @@ set(CASACORE_MISSING_COMPONENTS)
+ # files in ${prefix}/include/casacore, instead of ${prefix}/include.
+ if(NOT CASACORE_INCLUDE_DIR)
+   find_path(CASACORE_INCLUDE_DIR casa/aips.h
+-    PATHS ${CASACORE_ROOT_DIR} PATH_SUFFIXES include/casacore)
++    HINTS ${CASACORE_ROOT_DIR} PATH_SUFFIXES include/casacore)
+   mark_as_advanced(CASACORE_INCLUDE_DIR)
+ endif(NOT CASACORE_INCLUDE_DIR)
+ 
+diff --git a/cmake/FindWcsLib.cmake b/cmake/FindWcsLib.cmake
+index bab610f..f024a1b 100644
+--- a/cmake/FindWcsLib.cmake
++++ b/cmake/FindWcsLib.cmake
+@@ -35,9 +35,9 @@
+ if(NOT WCSLIB_FOUND)
+ 
+   find_path(WCSLIB_INCLUDE_DIR wcslib/wcs.h
+-    PATHS ${WCSLIB_ROOT_DIR} PATH_SUFFIXES include)
++    HINTS ${WCSLIB_ROOT_DIR} PATH_SUFFIXES include)
+   find_library(WCSLIB_LIBRARY wcs
+-    PATHS ${WCSLIB_ROOT_DIR} PATH_SUFFIXES lib)
++    HINTS ${WCSLIB_ROOT_DIR} PATH_SUFFIXES lib)
+   find_library(M_LIBRARY m)
+   mark_as_advanced(WCSLIB_INCLUDE_DIR WCSLIB_LIBRARY M_LIBRARY)
+ 
+-- 
+1.7.0.4
+

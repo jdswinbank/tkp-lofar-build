@@ -62,6 +62,13 @@ echo "Built & installed casacore r$CASACORE_VERSION."
 
 # Update & build casarest
 update_source "casarest" $CASARESTROOT $CASAREST_REVISION
+echo "Applying local patches."
+for patchfile in $PATCHES/casarest-patches/*patch
+do
+    echo $patchfile
+    git apply $patchfile
+    check_result "casarest" "git apply $patchfile" $TARGET $?
+done
 CASAREST_VERSION=$VERSION
 echo "Configuring casarest r$CASAREST_VERSION."
 mkdir -p $CASARESTROOT/build
