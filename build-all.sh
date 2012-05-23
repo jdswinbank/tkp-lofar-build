@@ -87,6 +87,12 @@ echo "Built & installed casarest r$CASAREST_VERSION."
 
 # Update & build pyrap
 update_source "pyrap" $PYRAPROOT $PYRAP_REVISION
+for patchfile in $PATCHES/pyrap-patches/*patch
+do
+    echo $patchfile
+    git apply $patchfile
+    check_result "pyrap" "git apply $patchfile" $TARGET $?
+done
 PYRAP_VERSION=$VERSION
 echo "Building & installing pyrap r$PYRAP_VERSION."
 mkdir -p $PYRAP_PYTHON_TARGET

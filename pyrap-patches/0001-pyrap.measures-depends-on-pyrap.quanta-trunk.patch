@@ -1,0 +1,24 @@
+From 0678d3a6c349863733d128c2e25bc33c299d8789 Mon Sep 17 00:00:00 2001
+From: John Swinbank <swinbank@transientskp.org>
+Date: Wed, 23 May 2012 12:55:09 +0200
+Subject: [PATCH] pyrap.measures depends on pyrap.quanta trunk
+
+Prevents it getting confused with older versions installed on the system.
+---
+ pyrap_measures/trunk/setup.py |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/pyrap_measures/trunk/setup.py b/pyrap_measures/trunk/setup.py
+index d8074ec..53505d8 100644
+--- a/pyrap_measures/trunk/setup.py
++++ b/pyrap_measures/trunk/setup.py
+@@ -28,5 +28,5 @@ This is a python module to access the casacore c++ measures package
+       zip_safe = 0,
+       license = 'GPL',
+       ext_modules =[ casaextension ],
+-      install_requires = ['pyrap.quanta'],
++      install_requires = ['pyrap.quanta==trunk'],
+       cmdclass={'build_ext': casacorebuild_ext, 'test': assay})
+-- 
+1.7.0.4
+
