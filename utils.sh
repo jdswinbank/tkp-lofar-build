@@ -1,5 +1,5 @@
 send_mail() {
-    echo "${2}" | mail -s "Build failure on heastro1: ${1}" jds
+    echo "${2}" | mail -s "Build failure on `hostname`: ${1}" `whoami`
 }
 
 check_result() {
