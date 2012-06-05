@@ -49,7 +49,6 @@ make install
 check_result "casacore" "make install" $TARGET $?
 echo "Built & installed casacore r$CASACORE_VERSION."
 
-
 # Update & build casarest
 update_source "casarest" $CASARESTROOT $CASAREST_REVISION
 echo "Applying local patches."
@@ -131,7 +130,7 @@ cmake -DCASACORE_ROOT_DIR=$CASACORE_TARGET \
     -DBUILD_SHARED_LIBS=ON                 \
     -DBUILD_PACKAGES=$LOFARPACKAGES        \
     -DCMAKE_INSTALL_PREFIX=$LOFAR_TARGET   \
-    -DUSE_LOG4CPLUS=OFF                    \
+#    -DUSE_LOG4CPLUS=OFF                    \
     -DUSE_OPENMP=ON                        \
     $LOFARROOT
 echo "Building LofIm."
