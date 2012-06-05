@@ -19,8 +19,7 @@ LOFARROOT=/var/scratch/LOFAR
 PATCHES=$(cd $(dirname "$0"); pwd)
 
 # LOFARSOFT packages to be built
-LOFARPACKAGES=Offline\;LofarFT\;Deployment\;SPW_Combine
-#LOFARPACKAGES="pyparameterset BBSControl BBSTools ExpIon pystationresponse pyparmdb MWImager DPPP AOFlagger LofarStMan MSLofar Pipeline"
+LOFARPACKAGES=Offline\;LofarFT\;Deployment
 
 # Locations of dependencies
 WCSLIBROOT=/opt/archive/wcslib/4.8.2 # Obsolete in Ubuntu 12.04?
