@@ -1,0 +1,27 @@
+From 16fb98c984a467b63c252b6e7ebe3a2e72bb6762 Mon Sep 17 00:00:00 2001
+From: Tim Staley <tim.staley@soton.ac.uk>
+Date: Fri, 8 Jun 2012 14:22:00 +0100
+Subject: [PATCH] Fix broken build on Ubuntu 12.04
+
+Add the std namespace qualifier to the size_t in CEP/DP3/DPPP/include/DPPP/Baseline.h
+This is required for a succesful build on Ubuntu 12.04
+---
+ CEP/DP3/DPPP/include/DPPP/Baseline.h |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CEP/DP3/DPPP/include/DPPP/Baseline.h b/CEP/DP3/DPPP/include/DPPP/Baseline.h
+index 4361905..f7bcc3c 100644
+--- a/CEP/DP3/DPPP/include/DPPP/Baseline.h
++++ b/CEP/DP3/DPPP/include/DPPP/Baseline.h
+@@ -36,7 +36,7 @@ namespace DPPP
+ // \addtogroup NDPPP
+ // @{
+ 
+-typedef std::pair<size_t, size_t>   Baseline;
++typedef std::pair<std::size_t, std::size_t>   Baseline;
+ 
+ // @}
+ 
+-- 
+1.7.9.5
+
