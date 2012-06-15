@@ -1,30 +1,32 @@
-From fcf0361d3dcb342f01eb5c24f3749adfcc44d142 Mon Sep 17 00:00:00 2001
+From d924e7387dc6aaa755ebbe9fe2a016e0c4c0788e Mon Sep 17 00:00:00 2001
 From: John Swinbank <swinbank@transientskp.org>
-Date: Thu, 5 Apr 2012 18:52:09 +0200
+Date: Fri, 15 Jun 2012 11:22:12 +0200
 Subject: [PATCH] Change hardcoded database host in gsm.py
 
 ---
- CEP/GSM/src/gsm.py |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
+ CEP/GSM/src/gsm.py |    6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/CEP/GSM/src/gsm.py b/CEP/GSM/src/gsm.py
-index 0dda92d..96d7f86 100755
+index e030546..bf2569f 100755
 --- a/CEP/GSM/src/gsm.py
 +++ b/CEP/GSM/src/gsm.py
-@@ -40,11 +40,11 @@ def gsmMain (name, argv):
-     if len(argv) > 5:
+@@ -42,12 +42,12 @@ def gsmMain (name, argv):
          theta = float(argv[5])
  
--    db_host = "ldb002"
+     #db_host = "ldb002"
+-    db_host = "napels"
 +    db_host = "heastrodb"
      db_dbase = "gsm"
      db_user = "gsm"
-     db_passwd = "msss"
--    db_port = 51000
+     #db_passwd = "msss"
+-    db_passwd = "gsm"
+-    db_port = 60000
++    db_passwd = "msss"
 +    db_port = 52000
      db_autocommit = True
  
      try:
 -- 
-1.7.0.4
+1.7.10
 
