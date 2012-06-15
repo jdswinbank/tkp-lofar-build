@@ -8,14 +8,12 @@ CASAREST_TARGET=$TARGET/casarest
 PYRAP_TARGET=$TARGET/pyrap
 PYRAP_PYTHON_TARGET=$PYRAP_TARGET/lib/python2.6/dist-packages
 LOFAR_TARGET=$TARGET/LofIm
-LUS_TARGET=$TARGET/lus
 
 # Locations of checked-out source
 CASACOREROOT=/var/scratch/casacore
 CASARESTROOT=/var/scratch/casarest
 PYRAPROOT=/var/scratch/pyrap
 LOFARROOT=/var/scratch/LOFAR
-LUSROOT=/var/scratch/lus
 
 # Base directory for local patches
 PATCHES=$(cd $(dirname "$0"); pwd)
@@ -23,9 +21,6 @@ PATCHES=$(cd $(dirname "$0"); pwd)
 # LOFARSOFT packages to be built
 LOFARPACKAGES=Offline\;LofarFT\;Deployment\;SPW_Combine
 #LOFARPACKAGES="pyparameterset BBSControl BBSTools ExpIon pystationresponse pyparmdb MWImager DPPP AOFlagger LofarStMan MSLofar Pipeline"
-
-# LUS packages to be built
-LUSPACKAGES=anaamika
 
 # Locations of dependencies
 WCSLIBROOT=/opt/archive/wcslib/4.8.2
@@ -42,7 +37,6 @@ do
         c) CASACORE_REVISION=$OPTARG;;
         r) CASAREST_REVISION=$OPTARG;;
         p) PYRAP_REVISION=$OPTARG;;
-        u) LUS_REVISION=$OPTARG;;
         \?) exit 1;;
     esac
 done
@@ -68,6 +62,13 @@ echo "Built & installed casacore r$CASACORE_VERSION."
 
 # Update & build casarest
 update_source "casarest" $CASARESTROOT $CASAREST_REVISION
+echo "Applying local patches."
+for patchfile in $PATCHES/casarest-patches/*patch
+do
+    echo $patchfile
+    git apply $patchfile
+    check_result "casarest" "git apply $patchfile" $TARGET $?
+done
 CASAREST_VERSION=$VERSION
 echo "Configuring casarest r$CASAREST_VERSION."
 mkdir -p $CASARESTROOT/build
@@ -86,6 +87,12 @@ echo "Built & installed casarest r$CASAREST_VERSION."
 
 # Update & build pyrap
 update_source "pyrap" $PYRAPROOT $PYRAP_REVISION
+for patchfile in $PATCHES/pyrap-patches/*patch
+do
+    echo $patchfile
+    git apply $patchfile
+    check_result "pyrap" "git apply $patchfile" $TARGET $?
+done
 PYRAP_VERSION=$VERSION
 echo "Building & installing pyrap r$PYRAP_VERSION."
 mkdir -p $PYRAP_PYTHON_TARGET
@@ -149,24 +156,6 @@ echo "Copying cookbook tools to local host."
 rsync -r lhn001:/opt/cep/tools/cookbook $TARGET
 check_result "Cookbook tools" "rsync" $TARGET $?
 
-update_source "lus" $LUSROOT $LUS_REVISION
-LUS_VERSION=$VERSION
-echo "Applying local patches."
-for patchfile in $PATCHES/lus-patches/*patch
-do
-    echo $patchfile
-    git apply $patchfile
-    check_result "lus" "git apply $patchfile" $TARGET $?
-done
-echo "Configuring lus r$LUS_VERSION."
-cd $LUSROOT
-./bootstrap -DLUS_INSTALL_PREFIX=$LUS_TARGET -DCASACORE_ROOT_DIR=$CASACORE_TARGET -DWCSLIB_ROOT_DIR=$WCSLIBROOT -DWCSLIB_FORCE_BUILD=ON
-echo "Building & installing lus."
-cd $LUSROOT/build
-make -j8 $LUSPACKAGES
-check_result "lus" "make" $TARGET $?
-echo "Built & installed lus r$LUS_VERSION."
-
 echo "Generating init.sh."
 INITFILE=$TARGET/init.sh
 cat > $INITFILE <<-END
@@ -188,10 +177,6 @@ export PYTHONPATH=$PYRAP_PYTHON_TARGET\${PYTHONPATH:+:\${PYTHONPATH}}
 
 # cookbook tools
 export PATH=$TARGET/cookbook\${PATH:+:\${PATH}}
-
-# lus
-# Anaamika (at least) handles its own library paths
-export PATH=$LUS_TARGET/bin\${PATH:+:\${PATH}}
 
 # LofIm
 . $LOFAR_TARGET/lofarinit.sh
