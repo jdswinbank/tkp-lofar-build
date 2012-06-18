@@ -182,6 +182,9 @@ export PATH=$TARGET/cookbook\${PATH:+:\${PATH}}
 . $LOFAR_TARGET/lofarinit.sh
 # Required to use gsm.py on heastro1
 export PYTHONPATH=/opt/monetdb/lib/python2.6/site-packages\${PYTHONPATH:+:\${PYTHONPATH}}
+
+# Casapy
+export PATH=/opt/casapy${PATH:+:${PATH}}
 END
 
 # Install this build as the default
