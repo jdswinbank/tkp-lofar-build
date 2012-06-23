@@ -184,7 +184,7 @@ export PATH=$TARGET/cookbook\${PATH:+:\${PATH}}
 export PYTHONPATH=/opt/monetdb/lib/python2.6/site-packages\${PYTHONPATH:+:\${PYTHONPATH}}
 
 # Casapy
-export PATH=/opt/casapy${PATH:+:${PATH}}
+export PATH=/opt/casapy\${PATH:+:\${PATH}}
 END
 
 # Install this build as the default
