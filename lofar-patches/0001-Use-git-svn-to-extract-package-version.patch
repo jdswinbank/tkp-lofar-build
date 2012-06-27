@@ -1,0 +1,26 @@
+From 00adea0f5343f98afc5bae8be46cd2d1349c2629 Mon Sep 17 00:00:00 2001
+From: John Swinbank <swinbank@transientskp.org>
+Date: Wed, 27 Jun 2012 15:50:09 +0200
+Subject: [PATCH] Use git svn to extract package version
+
+---
+ CMake/UpdatePackageVersion.cmake.in |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/CMake/UpdatePackageVersion.cmake.in b/CMake/UpdatePackageVersion.cmake.in
+index 83fd252..abe2b9a 100644
+--- a/CMake/UpdatePackageVersion.cmake.in
++++ b/CMake/UpdatePackageVersion.cmake.in
+@@ -58,7 +58,8 @@ set(ENV{LC_ALL} C)
+ # Retrieve version and revision information from the repository, using
+ # 'svn info' and 'svn status'
+ set(_svn_tmp "@PACKAGE_BINARY_DIR@/version.svn.tmp")
+-execute_process(COMMAND @SVNCOMMAND@ info @PACKAGE_SOURCE_DIR@
++execute_process(COMMAND git svn info .
++  WORKING_DIRECTORY @PACKAGE_SOURCE_DIR@
+   RESULT_VARIABLE _result
+   OUTPUT_FILE "${_svn_tmp}"
+   OUTPUT_STRIP_TRAILING_WHITESPACE
+-- 
+1.7.0.4
+
