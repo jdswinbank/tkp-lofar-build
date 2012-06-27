@@ -1,0 +1,34 @@
+From 9028f0193c40cd07ed40c4548753dff916f40c37 Mon Sep 17 00:00:00 2001
+From: John Swinbank <swinbank@transientskp.org>
+Date: Wed, 27 Jun 2012 14:15:05 +0200
+Subject: [PATCH] Enable build with gcc-4.7
+
+---
+ msvis/MSVis/MSMoments.tcc |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/msvis/MSVis/MSMoments.tcc b/msvis/MSVis/MSMoments.tcc
+index c400e59..2e08a0e 100644
+--- a/msvis/MSVis/MSMoments.tcc
++++ b/msvis/MSVis/MSMoments.tcc
+@@ -415,7 +415,7 @@ Bool MSMoments<T>::createMoments(PtrBlock< MeasurementSet* >& outPt,
+ 
+     // Set moment data units and assign pointer to output moments array
+     // Value of goodUnits is the same for each output moment
+-    goodUnits = setOutThings( suffix, momentUnits, dataUnits, 
++    goodUnits = this->setOutThings( suffix, momentUnits, dataUnits, 
+                               momentAxisUnits, moments_p( i ),
+                               convertToVelocity_p ) ;
+     // create output MSs
+@@ -578,7 +578,7 @@ Bool MSMoments<T>::createMoments(PtrBlock< MeasurementSet* >& outPt,
+   ((SubLattice<T> *)mskArrIn)->setPixelMask( mskLatIn, False ) ; 
+   PtrBlock< MaskedLattice<T>* > arrLatOutPts( moments_p.nelements() ) ;
+   IPosition outDataShape ;
+-  CoordinateSystem cSysOut = makeOutputCoordinates( outDataShape, 
++  CoordinateSystem cSysOut = this->makeOutputCoordinates( outDataShape, 
+                                                     cSys, 
+                                                     mskArrIn->shape(), 
+                                                     momentAxis_p, 
+-- 
+1.7.10
+
