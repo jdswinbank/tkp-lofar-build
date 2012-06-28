@@ -11,7 +11,6 @@ SOURCE=/home/jds/src
 # Target directory for installation
 TARGET=/home/jds/sw
 echo "Installing into $TARGET."
-WCSLIB_TARGET=$TARGET    #/wcslib
 CASACORE_TARGET=$TARGET  #/casacore
 CASAREST_TARGET=$TARGET  #/casarest
 LOFAR_TARGET=$TARGET     #/LofIm
@@ -31,23 +30,6 @@ PATCHES=$(cd $(dirname "$0"); pwd)
 
 mkdir -p $SOURCE
 
-# Download & build wcslib
-echo "Fetching wcslib"
-cd $SOURCE
-rm -rf wcslib-4.13.4
-if [ ! -f wcslib-4.13.4.tar.bz2 ]; then
-    wget ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib-4.13.4.tar.bz2
-fi
-tar jxvf wcslib-4.13.4.tar.bz2
-echo "Configuring wcslib"
-cd wcslib-4.13.4
-mkdir -p $WCSLIB_TARGET
-./configure --prefix=$WCSLIB_TARGET
-echo "Building wcslib"
-make -j${BUILD_JOBS}
-echo "Installing wcslib"
-make install
-
 echo "Fetching measures data"
 mkdir -p `dirname $DATADIR`
 wget -O- ftp://ftp.atnf.csiro.au/pub/software/measures_data/measures_data.tar.bz2 | tar jxvC `dirname $DATADIR`
@@ -66,7 +48,6 @@ mkdir -p $SOURCE/casacore/build/opt
 cd $SOURCE/casacore/build/opt
 cmake -DCMAKE_INSTALL_PREFIX=$CASACORE_TARGET \
     -DUSE_HDF5=OFF                            \
-    -DWCSLIB_ROOT_DIR=$WCSLIB_TARGET          \
     -DDATA_DIR=$DATADIR                       \
     $SOURCE/casacore
 echo "Building casacore."
@@ -86,8 +67,7 @@ git clean -dfx
 echo "Configuring casarest"
 mkdir -p $SOURCE/casarest/build
 cd $SOURCE/casarest/build
-cmake -DWCSLIB_ROOT_DIR=$WCSLIB_TARGET      \
-    -DCASACORE_ROOT_DIR=$CASACORE_TARGET    \
+cmake -DCASACORE_ROOT_DIR=$CASACORE_TARGET    \
     -DCMAKE_INSTALL_PREFIX=$CASAREST_TARGET \
     $SOURCE/casarest
 echo "Building casarest."
@@ -117,7 +97,6 @@ $SOURCE/LOFAR/CMake/gen_LofarPackageList_cmake.sh
 mkdir -p $SOURCE/LOFAR/build/gnu_opt
 cd $SOURCE/LOFAR/build/gnu_opt
 cmake -DCASACORE_ROOT_DIR=$CASACORE_TARGET \
-    -DWCSLIB_ROOT_DIR=$WCSLIB_TARGET       \
     -DCASAREST_ROOT_DIR=$CASAREST_TARGET   \
     -DBUILD_SHARED_LIBS=ON                 \
     -DBUILD_PACKAGES=$LOFARPACKAGES        \
@@ -140,7 +119,7 @@ git clean -dfx
 echo "Configuring Pelican"
 mkdir -p pelican/build
 cd pelican/build
-PATH= cmake                                               \
+cmake                                                     \
     -DCMAKE_BUILD_TYPE=release                            \
     -DCMAKE_INSTALL_PREFIX=$PELICAN_TARGET                \
     ../CMakeLists.txt
