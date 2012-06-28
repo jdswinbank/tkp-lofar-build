@@ -6,18 +6,15 @@ set -e
 HEASTRO1=jds@heastro1.science.uva.nl
 
 # Location of sources
-SOURCE=/var/scratch/swinbank/src
+SOURCE=/home/jds/src
 
 # Target directory for installation
-TARGET=/var/scratch/swinbank/sw
+TARGET=/home/jds/sw
 echo "Installing into $TARGET."
 WCSLIB_TARGET=$TARGET    #/wcslib
-CFITSIO_TARGET=$TARGET   #/cfitsio
 CASACORE_TARGET=$TARGET  #/casacore
 CASAREST_TARGET=$TARGET  #/casarest
 LOFAR_TARGET=$TARGET     #/LofIm
-QT_TARGET=$TARGET        #/qt
-CPPUNIT_TARGET=$TARGET   #/cppunit
 PELICAN_TARGET=$TARGET   #/pelican
 
 # Locations of casacore measures data
@@ -27,7 +24,7 @@ DATADIR=$TARGET/share/measures/data
 LOFARPACKAGES=LofarStMan
 
 # Number of simultaneous jobs
-BUILD_JOBS=16
+BUILD_JOBS=4
 
 # Base directory for local patches
 PATCHES=$(cd $(dirname "$0"); pwd)
@@ -51,23 +48,6 @@ make -j${BUILD_JOBS}
 echo "Installing wcslib"
 make install
 
-# Download & build cfitsio
-echo "Fetching cfitsio"
-cd $SOURCE
-rm -rf cfitsio
-if [ ! -f cfitsio3290.tar.gz ]; then
-    wget ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3290.tar.gz
-fi
-tar zxvf cfitsio3290.tar.gz
-echo "Configuring cfitsio"
-cd cfitsio
-mkdir -p $CFITSIO_TARGET
-./configure --prefix=$CFITSIO_TARGET
-echo "Building cfitsio"
-make -j${BUILD_JOBS} shared
-echo "Installing cfitsio"
-make install
-
 echo "Fetching measures data"
 mkdir -p `dirname $DATADIR`
 wget -O- ftp://ftp.atnf.csiro.au/pub/software/measures_data/measures_data.tar.bz2 | tar jxvC `dirname $DATADIR`
@@ -87,7 +67,6 @@ cd $SOURCE/casacore/build/opt
 cmake -DCMAKE_INSTALL_PREFIX=$CASACORE_TARGET \
     -DUSE_HDF5=OFF                            \
     -DWCSLIB_ROOT_DIR=$WCSLIB_TARGET          \
-    -DCFITSIO_ROOT_DOR=$CFITSIO_TARGET        \
     -DDATA_DIR=$DATADIR                       \
     $SOURCE/casacore
 echo "Building casacore."
@@ -143,44 +122,12 @@ cmake -DCASACORE_ROOT_DIR=$CASACORE_TARGET \
     -DBUILD_SHARED_LIBS=ON                 \
     -DBUILD_PACKAGES=$LOFARPACKAGES        \
     -DCMAKE_INSTALL_PREFIX=$LOFAR_TARGET   \
-    -DUSE_LOG4CPLUS=OFF                    \
     $SOURCE/LOFAR
 echo "Building LofIm."
 make -j${BUILD_JOBS}
 echo "Installing LofIm."
 make install
 echo "Built & installed LofIm."
-
-echo "Fetching Qt"
-cd $SOURCE
-rm -rf qt-everywhere-opensource-src-4.8.1
-if [ ! -f qt-everywhere-opensource-src-4.8.1.tar.gz ]; then
-    wget http://download.qt.nokia.com/qt/source/qt-everywhere-opensource-src-4.8.1.tar.gz
-fi
-tar zxvf qt-everywhere-opensource-src-4.8.1.tar.gz
-echo "Configuring Qt"
-cd qt-everywhere-opensource-src-4.8.1
-mkdir -p $QT_TARGET
-echo "yes" | ./configure -opensource -prefix $QT_TARGET
-echo "Building Qt"
-make -j${BUILD_JOBS}
-echo "Installing Qt"
-make install
-
-echo "Fetching CppUnit"
-cd $SOURCE
-rm -rf cppunit-1.12.1
-if [ ! -f cppunit-1.12.1.tar.gz ]; then
-    wget http://downloads.sourceforge.net/cppunit/cppunit-1.12.1.tar.gz
-fi
-tar zxvf cppunit-1.12.1.tar.gz
-cd cppunit-1.12.1
-echo "Configuring CppUnit"
-./configure --prefix=$CPPUNIT_TARGET
-echo "Building CppUnit"
-make -j${BUILD_JOBS}
-echo "Installing CppUnit"
-make install
 
 echo "Fetching Pelican"
 cd $SOURCE
@@ -193,11 +140,9 @@ git clean -dfx
 echo "Configuring Pelican"
 mkdir -p pelican/build
 cd pelican/build
-PATH=$QT_TARGET/bin${PATH:+:$PATH}} cmake                 \
+PATH= cmake                                               \
     -DCMAKE_BUILD_TYPE=release                            \
     -DCMAKE_INSTALL_PREFIX=$PELICAN_TARGET                \
-    -DCPPUNIT_INCLUDE_DIR=$CPPUNIT_TARGET/include/cppunit \
-    -DCPPUNIT_LIBRARIES=$CPPUNIT_TARGET/lib/libcppunit.so \
     ../CMakeLists.txt
 echo "Building pelican"
 cd ..
