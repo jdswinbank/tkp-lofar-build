@@ -115,19 +115,6 @@ echo "Built & installed pyrap r$PYRAP_VERSION."
 update_source "LofIm" $LOFARROOT $LOFAR_REVISION
 LOFAR_VERSION=$VERSION
 
-echo "Inserting external ASKAPsoft dependencies."
-CLUSTERBUILD=`date --date="today" +%a`
-for path in Base/accessors/src \
-    Base/askap/src \
-    Base/mwcommon/src \
-    Base/scimath/src \
-    Components/Synthesis/synthesis/src
-do
-  rsync -tvvr --exclude=.svn \
-  lhn001:/opt/cep/LofIm/daily/$CLUSTERBUILD/lofar_build/LOFAR/CEP/Imager/ASKAPsoft/$path/ \
-  $LOFARROOT/CEP/Imager/ASKAPsoft/$path
-done
-
 echo "Applying local patches."
 for patchfile in $PATCHES/lofar-patches/*patch
 do

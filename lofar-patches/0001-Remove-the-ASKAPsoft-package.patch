@@ -1,0 +1,23 @@
+From 542457763bc20150534c7a557b0d5b7618f0be0e Mon Sep 17 00:00:00 2001
+From: John Swinbank <swinbank@transientskp.org>
+Date: Thu, 28 Jun 2012 17:08:51 +0200
+Subject: [PATCH] Remove the ASKAPsoft package
+
+---
+ CEP/Imager/CMakeLists.txt |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CEP/Imager/CMakeLists.txt b/CEP/Imager/CMakeLists.txt
+index dd2d83e..1a12f79 100644
+--- a/CEP/Imager/CMakeLists.txt
++++ b/CEP/Imager/CMakeLists.txt
+@@ -4,5 +4,5 @@
+ lofar_add_package(MWImager)
+ # Commented LofarGridder after Ger told this is not used anymore
+ #lofar_add_package(LofarGridder)
+-lofar_add_package(ASKAPsoft)
++#lofar_add_package(ASKAPsoft)
+ lofar_add_package(LofarFT)
+-- 
+1.7.10
+
