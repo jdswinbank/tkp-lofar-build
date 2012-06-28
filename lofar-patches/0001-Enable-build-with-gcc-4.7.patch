@@ -1,0 +1,73 @@
+From 5526b2a3ea1997f194a91a8ddede1dc3d4877c96 Mon Sep 17 00:00:00 2001
+From: John Swinbank <swinbank@transientskp.org>
+Date: Thu, 28 Jun 2012 15:57:59 +0200
+Subject: [PATCH] Enable build with gcc-4.7
+
+---
+ .../include/AOFlagger/quality/baselinestatisticsmap.h      |    4 ++--
+ CEP/DP3/AOFlagger/src/msio/baselinematrixloader.cpp        |    2 +-
+ CEP/DP3/AOFlagger/src/msio/directbaselinereader.cpp        |   12 ++++++------
+ 3 files changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/CEP/DP3/AOFlagger/include/AOFlagger/quality/baselinestatisticsmap.h b/CEP/DP3/AOFlagger/include/AOFlagger/quality/baselinestatisticsmap.h
+index a00625b..b483945 100644
+--- a/CEP/DP3/AOFlagger/include/AOFlagger/quality/baselinestatisticsmap.h
++++ b/CEP/DP3/AOFlagger/include/AOFlagger/quality/baselinestatisticsmap.h
+@@ -172,7 +172,7 @@ class BaselineStatisticsMap : public Serializable
+ 		void unserializeOuterMap(std::istream &stream, OuterMap &map) const
+ 		{
+ 			size_t size = UnserializeUInt32(stream);
+-			for(size_t i=0;i<size;++i)
++			for(size_t j=0;j<size;++j)
+ 			{
+ 				unsigned antenna1 = UnserializeUInt32(stream);
+ 				
+@@ -199,7 +199,7 @@ class BaselineStatisticsMap : public Serializable
+ 		void unserializeInnerMap(std::istream &stream, InnerMap &map) const
+ 		{
+ 			size_t size = UnserializeUInt32(stream);
+-			for(size_t i=0;i<size;++i)
++			for(size_t j=0;j<size;++j)
+ 			{
+ 				unsigned antenna2 = UnserializeUInt32(stream);
+ 				
+diff --git a/CEP/DP3/AOFlagger/src/msio/baselinematrixloader.cpp b/CEP/DP3/AOFlagger/src/msio/baselinematrixloader.cpp
+index 763b97f..36812b8 100644
+--- a/CEP/DP3/AOFlagger/src/msio/baselinematrixloader.cpp
++++ b/CEP/DP3/AOFlagger/src/msio/baselinematrixloader.cpp
+@@ -121,7 +121,7 @@ TimeFrequencyData BaselineMatrixLoader::LoadSummed(size_t timeIndex)
+ 		yxMask = Mask2D::CreateUnsetMaskPtr(nrAntenna, nrAntenna),
+ 		yyMask = Mask2D::CreateUnsetMaskPtr(nrAntenna, nrAntenna);
+ 
+-	for(size_t i=0;i<table.nrow();++i)
++	for(size_t j=0;j<table.nrow();++j)
+ 	{
+ 		int
+ 			a1 = *antenna1Iter,
+diff --git a/CEP/DP3/AOFlagger/src/msio/directbaselinereader.cpp b/CEP/DP3/AOFlagger/src/msio/directbaselinereader.cpp
+index 49dcea2..08f32ef 100644
+--- a/CEP/DP3/AOFlagger/src/msio/directbaselinereader.cpp
++++ b/CEP/DP3/AOFlagger/src/msio/directbaselinereader.cpp
+@@ -252,13 +252,13 @@ std::vector<UVW> DirectBaselineReader::ReadUVW(unsigned antenna1, unsigned anten
+ 			timeIndex = allObservationTimes.find(time)->second;
+ 
+ 		casa::Array<double> arr = uvwColumn(rowIndex);
+-		casa::Array<double>::const_iterator i = arr.begin();
++		casa::Array<double>::const_iterator j = arr.begin();
+ 		UVW &uvw = uvws[timeIndex];
+-		uvw.u = *i;
+-		++i;
+-		uvw.v = *i;
+-		++i;
+-		uvw.w = *i;
++		uvw.u = *j;
++		++j;
++		uvw.v = *j;
++		++j;
++		uvw.w = *j;
+ 	}
+ 	
+ 	AOLogger::Debug << "Read of UVW took: " << stopwatch.ToString() << '\n';
+-- 
+1.7.10
+
