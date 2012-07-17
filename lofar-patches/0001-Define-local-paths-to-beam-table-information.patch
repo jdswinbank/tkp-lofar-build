@@ -1,25 +1,25 @@
-From d1b8b4df8ea9b19fd622bb9f3d28bfa845cda1f0 Mon Sep 17 00:00:00 2001
+From 9bd9213824374ac6b29e5304861a9d5b8695ad4e Mon Sep 17 00:00:00 2001
 From: John Swinbank <swinbank@transientskp.org>
-Date: Tue, 17 Jul 2012 10:41:12 +0200
+Date: Tue, 17 Jul 2012 11:38:35 +0200
 Subject: [PATCH] Define local paths to beam table information
 
 ---
- LCS/MSLofar/src/CMakeLists.txt       |    2 +
- LCS/MSLofar/src/makebeamtables.cc    |   87 ----------------------------------
- LCS/MSLofar/src/makebeamtables.cc.in |   87 ++++++++++++++++++++++++++++++++++
+ LCS/MSLofar/src/CMakeLists.txt          |    2 +
+ LCS/MSLofar/src/makebeamtables.cc       |   87 -------------------------------
+ LCS/MSLofar/src/makebeamtables.cc.cmake |   87 +++++++++++++++++++++++++++++++
  3 files changed, 89 insertions(+), 87 deletions(-)
  delete mode 100644 LCS/MSLofar/src/makebeamtables.cc
- create mode 100644 LCS/MSLofar/src/makebeamtables.cc.in
+ create mode 100644 LCS/MSLofar/src/makebeamtables.cc.cmake
 
 diff --git a/LCS/MSLofar/src/CMakeLists.txt b/LCS/MSLofar/src/CMakeLists.txt
-index 3a3bd46..b661cdf 100644
+index 3a3bd46..e797b3f 100644
 --- a/LCS/MSLofar/src/CMakeLists.txt
 +++ b/LCS/MSLofar/src/CMakeLists.txt
 @@ -22,6 +22,8 @@ lofar_add_library(mslofar
    BeamTables.cc
  )
  
-+configure_file(makebeamtables.cc.in makebeamtables.cc)
++configure_file(makebeamtables.cc.cmake makebeamtables.cc)
 +
  lofar_add_bin_program(versionmslofar versionmslofar.cc)
  lofar_add_bin_program(makebeamtables makebeamtables.cc)
@@ -117,11 +117,11 @@ index 7f44dbb..0000000
 -  }
 -  return 0;
 -}
-diff --git a/LCS/MSLofar/src/makebeamtables.cc.in b/LCS/MSLofar/src/makebeamtables.cc.in
+diff --git a/LCS/MSLofar/src/makebeamtables.cc.cmake b/LCS/MSLofar/src/makebeamtables.cc.cmake
 new file mode 100644
 index 0000000..c3f7865
 --- /dev/null
-+++ b/LCS/MSLofar/src/makebeamtables.cc.in
++++ b/LCS/MSLofar/src/makebeamtables.cc.cmake
 @@ -0,0 +1,87 @@
 +//# makebeamtables.cc: Program 
 +//# Copyright (C) 2011
