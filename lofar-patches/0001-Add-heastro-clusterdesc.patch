@@ -4,26 +4,26 @@ Date: Fri, 9 Dec 2011 12:43:06 +0100
 Subject: [PATCH] Add heastro clusterdesc
 
 ---
- LCS/Common/share/CMakeLists.txt      |    1 +
- LCS/Common/share/heastro.clusterdesc |    5 +++++
+ CEP/LMWCommon/share/CMakeLists.txt      |    1 +
+ CEP/LMWCommon/share/heastro.clusterdesc |    5 +++++
  2 files changed, 6 insertions(+), 0 deletions(-)
- create mode 100644 LCS/Common/share/heastro.clusterdesc
+ create mode 100644 CEP/LMWCommon/share/heastro.clusterdesc
 
-diff --git a/LCS/Common/share/CMakeLists.txt b/LCS/Common/share/CMakeLists.txt
+diff --git a/CEP/LMWCommon/share/CMakeLists.txt b/CEP/LMWCommon/share/CMakeLists.txt
 index 3ac5a03..cb8d5bc 100644
---- a/LCS/Common/share/CMakeLists.txt
-+++ b/LCS/Common/share/CMakeLists.txt
+--- a/CEP/LMWCommon/share/CMakeLists.txt
++++ b/CEP/LMWCommon/share/CMakeLists.txt
 @@ -16,4 +16,5 @@ sub6.clusterdesc
  sub7.clusterdesc
  sub8.clusterdesc
  local.clusterdesc
 +heastro.clusterdesc
  DESTINATION share)
-diff --git a/LCS/Common/share/heastro.clusterdesc b/LCS/Common/share/heastro.clusterdesc
+diff --git a/CEP/LMWCommon/share/heastro.clusterdesc b/CEP/LMWCommon/share/heastro.clusterdesc
 new file mode 100644
 index 0000000..d4e71dd
 --- /dev/null
-+++ b/LCS/Common/share/heastro.clusterdesc
++++ b/CEP/LMWCommon/share/heastro.clusterdesc
 @@ -0,0 +1,5 @@
 +ClusterName = heastro
 +
