@@ -1,22 +1,22 @@
-From cded619bedfedca77fda686617e4a6ee110521e1 Mon Sep 17 00:00:00 2001
+From 59cf52b493d5238ef18eae009ab9ba4ff4473092 Mon Sep 17 00:00:00 2001
 From: John Swinbank <swinbank@transientskp.org>
-Date: Fri, 9 Dec 2011 12:43:06 +0100
+Date: Wed, 19 Sep 2012 11:03:43 +0200
 Subject: [PATCH] Add heastro clusterdesc
 
 ---
  CEP/LMWCommon/share/CMakeLists.txt      |    1 +
  CEP/LMWCommon/share/heastro.clusterdesc |    5 +++++
- 2 files changed, 6 insertions(+), 0 deletions(-)
+ 2 files changed, 6 insertions(+)
  create mode 100644 CEP/LMWCommon/share/heastro.clusterdesc
 
 diff --git a/CEP/LMWCommon/share/CMakeLists.txt b/CEP/LMWCommon/share/CMakeLists.txt
-index 3ac5a03..cb8d5bc 100644
+index 72a9144..4cbb18c 100644
 --- a/CEP/LMWCommon/share/CMakeLists.txt
 +++ b/CEP/LMWCommon/share/CMakeLists.txt
-@@ -16,4 +16,5 @@ sub6.clusterdesc
- sub7.clusterdesc
+@@ -17,4 +17,5 @@ sub7.clusterdesc
  sub8.clusterdesc
  local.clusterdesc
+ cep1_test.clusterdesc
 +heastro.clusterdesc
  DESTINATION share)
 diff --git a/CEP/LMWCommon/share/heastro.clusterdesc b/CEP/LMWCommon/share/heastro.clusterdesc
@@ -31,5 +31,5 @@ index 0000000..d4e71dd
 +Compute.RemoteDisks = [ /home, /zfs/heastro-plex ]
 +Compute.RemoteFileSys = [ heastro1:/home, heastro1:/zfs/heastro-plex ]
 -- 
-1.7.7.3
+1.7.10.4
 
