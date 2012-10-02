@@ -1,24 +1,786 @@
-From 51c04252941761d746eb1522a523d18b9ef0fbfe Mon Sep 17 00:00:00 2001
+From f90d997c41fb933d97a5369946afd10a84008124 Mon Sep 17 00:00:00 2001
 From: John Swinbank <swinbank@transientskp.org>
-Date: Tue, 2 Oct 2012 10:02:02 +0200
+Date: Tue, 2 Oct 2012 11:04:18 +0200
 Subject: [PATCH] Fix compile with gcc-4.7
 
 ---
- casa/Arrays/IPosition.h |    1 +
- 1 file changed, 1 insertion(+)
+ casa/Arrays/Array2.cc                   |   10 ++--
+ casa/Arrays/ArrayBase.h                 |    8 +--
+ casa/Arrays/IPosition.cc                |   70 +++++++++++-----------
+ casa/Arrays/IPosition.h                 |   98 +++++++++++++++----------------
+ casa/Arrays/IPosition2.cc               |    6 +-
+ casa/Arrays/Slice.h                     |    4 +-
+ casa/Arrays/Slicer.cc                   |    4 +-
+ casa/Arrays/Slicer.h                    |   10 ++--
+ casa/Arrays/VectorSTLIterator.h         |    4 +-
+ lattices/Lattices/LCExtension.cc        |    2 +-
+ lattices/Lattices/LCStretch.cc          |    2 +-
+ lattices/Lattices/RebinLattice.tcc      |    4 +-
+ scimath/Mathematics/ConvolveGridder.tcc |   10 ++--
+ 13 files changed, 116 insertions(+), 116 deletions(-)
 
+diff --git a/casa/Arrays/Array2.cc b/casa/Arrays/Array2.cc
+index 281b7d7..1d8e03a 100644
+--- a/casa/Arrays/Array2.cc
++++ b/casa/Arrays/Array2.cc
+@@ -33,7 +33,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
+ 
+ // This probably isn't of interest to normal users. It returns the "volume" of
+ // an array (i.e. "nelements").
+-size_t ArrayVolume (uInt Ndim, const ssize_t *Shape)
++size_t ArrayVolume (uInt Ndim, const ptrdiff_t *Shape)
+ {
+     uInt i;
+     if (aips_debug) {
+@@ -54,8 +54,8 @@ size_t ArrayVolume (uInt Ndim, const ssize_t *Shape)
+ // array with a non-zero origin, what is the linear index into storage.
+ // Here we assume that the Shape is the original length, i.e. has INC
+ // in it.
+-size_t ArrayIndexOffset (uInt Ndim, const ssize_t *Shape,
+-                         const ssize_t *Origin, const ssize_t *Inc,
++size_t ArrayIndexOffset (uInt Ndim, const ptrdiff_t *Shape,
++                         const ptrdiff_t *Origin, const ptrdiff_t *Inc,
+                          const IPosition &Index)
+ {
+     uInt i;
+@@ -73,8 +73,8 @@ size_t ArrayIndexOffset (uInt Ndim, const ssize_t *Shape,
+     return offset;
+ }
+ 
+-size_t ArrayIndexOffset (uInt Ndim, const ssize_t *Shape,
+-                         const ssize_t *Inc, const IPosition &Index)
++size_t ArrayIndexOffset (uInt Ndim, const ptrdiff_t *Shape,
++                         const ptrdiff_t *Inc, const IPosition &Index)
+ {
+     uInt i;
+     if (aips_debug) {
+diff --git a/casa/Arrays/ArrayBase.h b/casa/Arrays/ArrayBase.h
+index fd814b0..d116dd2 100644
+--- a/casa/Arrays/ArrayBase.h
++++ b/casa/Arrays/ArrayBase.h
+@@ -257,11 +257,11 @@ size_t ArrayVolume (uInt Ndim, const Int* Shape);
+ //  An Array helper function.
+ // <group>
+ //# Implemented in Array2.cc.
+-size_t ArrayIndexOffset (uInt Ndim, const ssize_t* Shape, 
+-                         const ssize_t* Origin, const ssize_t* Inc, 
++size_t ArrayIndexOffset (uInt Ndim, const ptrdiff_t* Shape,
++                         const ptrdiff_t* Origin, const ptrdiff_t* Inc,
+                          const IPosition& Index);
+-size_t ArrayIndexOffset (uInt Ndim, const ssize_t* Shape, 
+-                         const ssize_t* Inc, const IPosition& Index);
++size_t ArrayIndexOffset (uInt Ndim, const ptrdiff_t* Shape,
++                         const ptrdiff_t* Inc, const IPosition& Index);
+ // </group>
+ 
+ // </group>
+diff --git a/casa/Arrays/IPosition.cc b/casa/Arrays/IPosition.cc
+index fcd595d..12bb041 100644
+--- a/casa/Arrays/IPosition.cc
++++ b/casa/Arrays/IPosition.cc
+@@ -56,12 +56,12 @@ void IPosition::allocateBuffer()
+     if (size_p <= BufferLength) {
+         data_p = buffer_p;
+     } else {
+-	data_p = new ssize_t[size_p];
++	data_p = new ptrdiff_t[size_p];
+     }
+     DebugAssert(ok(), AipsError);
+ }
+ 
+-IPosition::IPosition (uInt length, ssize_t val)
++IPosition::IPosition (uInt length, ptrdiff_t val)
+ : size_p (length),
+   data_p (buffer_p)
+ {
+@@ -76,9 +76,9 @@ IPosition::IPosition (uInt length, ssize_t val)
+ // <thrown>
+ //    <item> AipsError
+ // </thrown>
+-IPosition::IPosition (uInt length, ssize_t val0, ssize_t val1, ssize_t val2,
+-                      ssize_t val3, ssize_t val4, ssize_t val5, ssize_t val6,
+-                      ssize_t val7, ssize_t val8, ssize_t val9)
++IPosition::IPosition (uInt length, ptrdiff_t val0, ptrdiff_t val1, ptrdiff_t val2,
++                      ptrdiff_t val3, ptrdiff_t val4, ptrdiff_t val5, ptrdiff_t val6,
++                      ptrdiff_t val7, ptrdiff_t val8, ptrdiff_t val9)
+ : size_p (length),
+   data_p (buffer_p)
+ {
+@@ -149,7 +149,7 @@ IPosition IPosition::nonDegenerate (const IPosition& ignoreAxes) const
+     uInt i;
+     IPosition keepAxes(size_p, 0);
+     for (i=0; i<ignoreAxes.nelements(); i++) {
+-	AlwaysAssert (ignoreAxes(i) < ssize_t(size_p), AipsError);
++	AlwaysAssert (ignoreAxes(i) < ptrdiff_t(size_p), AipsError);
+ 	keepAxes(ignoreAxes(i)) = 1;
+     }
+     // Now count all axes to keep.
+@@ -183,7 +183,7 @@ void IPosition::resize (uInt newSize, Bool copy)
+     if (newSize == size_p) {
+ 	return;
+     }
+-    ssize_t* oldData = data_p;
++    ptrdiff_t* oldData = data_p;
+     uInt oldSize = size_p;
+     size_p = newSize;
+     allocateBuffer();
+@@ -221,7 +221,7 @@ IPosition& IPosition::operator= (const IPosition& other)
+     return *this;
+ }
+ 
+-IPosition& IPosition::operator= (ssize_t value)
++IPosition& IPosition::operator= (ptrdiff_t value)
+ {
+     DebugAssert(ok(), AipsError);
+     for (uInt i=0; i<size_p; i++) {
+@@ -393,7 +393,7 @@ void IPosition::operator /= (const IPosition& other)
+     }
+ }
+ 
+-void IPosition::operator += (ssize_t val)
++void IPosition::operator += (ptrdiff_t val)
+ {
+     DebugAssert(ok(), AipsError);
+     for (uInt i=0; i<size_p; i++) {
+@@ -401,7 +401,7 @@ void IPosition::operator += (ssize_t val)
+     }
+ }
+ 
+-void IPosition::operator -= (ssize_t val)
++void IPosition::operator -= (ptrdiff_t val)
+ {
+     DebugAssert(ok(), AipsError);
+     for (uInt i=0; i<size_p; i++) {
+@@ -409,7 +409,7 @@ void IPosition::operator -= (ssize_t val)
+     }
+ }
+ 
+-void IPosition::operator *= (ssize_t val)
++void IPosition::operator *= (ptrdiff_t val)
+ {
+     DebugAssert(ok(), AipsError);
+     for (uInt i=0; i<size_p; i++) {
+@@ -417,7 +417,7 @@ void IPosition::operator *= (ssize_t val)
+     }
+ }
+ 
+-void IPosition::operator /= (ssize_t val)
++void IPosition::operator /= (ptrdiff_t val)
+ {
+     DebugAssert(ok(), AipsError);
+     for (uInt i=0; i<size_p; i++) {
+@@ -560,35 +560,35 @@ IPosition operator / (const IPosition& left, const IPosition& right)
+     return result;
+ }
+ 
+-IPosition operator + (const IPosition& left, ssize_t val)
++IPosition operator + (const IPosition& left, ptrdiff_t val)
+ {
+     IPosition result(left);
+     result += val;
+     return result;
+ }
+ 
+-IPosition operator - (const IPosition& left, ssize_t val)
++IPosition operator - (const IPosition& left, ptrdiff_t val)
+ {
+     IPosition result(left);
+     result -= val;
+     return result;
+ }
+ 
+-IPosition operator * (const IPosition& left, ssize_t val)
++IPosition operator * (const IPosition& left, ptrdiff_t val)
+ {
+     IPosition result(left);
+     result *= val;
+     return result;
+ }
+ 
+-IPosition operator / (const IPosition& left, ssize_t val)
++IPosition operator / (const IPosition& left, ptrdiff_t val)
+ {
+     IPosition result(left);
+     result /= val;
+     return result;
+ }
+ 
+-IPosition operator + (ssize_t val, const IPosition& right)
++IPosition operator + (ptrdiff_t val, const IPosition& right)
+ {
+     IPosition result(right.nelements());
+     result = val;
+@@ -596,7 +596,7 @@ IPosition operator + (ssize_t val, const IPosition& right)
+     return result;
+ }
+ 
+-IPosition operator - (ssize_t val, const IPosition& right)
++IPosition operator - (ptrdiff_t val, const IPosition& right)
+ {
+     IPosition result(right.nelements());
+     result = val;
+@@ -604,7 +604,7 @@ IPosition operator - (ssize_t val, const IPosition& right)
+     return result;
+ }
+ 
+-IPosition operator * (ssize_t val, const IPosition& right)
++IPosition operator * (ptrdiff_t val, const IPosition& right)
+ {
+     IPosition result(right.nelements());
+     result = val;
+@@ -612,7 +612,7 @@ IPosition operator * (ssize_t val, const IPosition& right)
+     return result;
+ }
+ 
+-IPosition operator / (ssize_t val, const IPosition& right)
++IPosition operator / (ptrdiff_t val, const IPosition& right)
+ {
+     IPosition result(right.nelements());
+     result = val;
+@@ -629,7 +629,7 @@ IPosition max (const IPosition& left, const IPosition& right)
+     }
+     IPosition result(left);
+     const uInt ndim = result.nelements();
+-    ssize_t max;
++    ptrdiff_t max;
+     for (uInt i = 0; i < ndim; i++) {
+       if (result(i) < (max = right(i))) {
+         result(i) = max;
+@@ -650,7 +650,7 @@ IPosition min (const IPosition& left, const IPosition& right)
+     }
+     IPosition result(left);
+     const uInt ndim = result.nelements();
+-    ssize_t min;
++    ptrdiff_t min;
+     for (uInt i = 0; i < ndim; i++) {
+       if (result(i) > (min = right(i))) {
+         result(i) = min;
+@@ -819,7 +819,7 @@ Bool operator >= (const IPosition& left, const IPosition& right)
+     return result;
+ }
+ 
+-Bool operator == (const IPosition& left, ssize_t val)
++Bool operator == (const IPosition& left, ptrdiff_t val)
+ {
+     Bool result = True;
+     uInt n = left.nelements();
+@@ -834,7 +834,7 @@ Bool operator == (const IPosition& left, ssize_t val)
+     return result;
+ }
+ 
+-Bool operator != (const IPosition& left, ssize_t val)
++Bool operator != (const IPosition& left, ptrdiff_t val)
+ {
+     Bool result = False;
+     uInt n = left.nelements();
+@@ -849,7 +849,7 @@ Bool operator != (const IPosition& left, ssize_t val)
+     return result;
+ }
+ 
+-Bool operator < (const IPosition& left, ssize_t val)
++Bool operator < (const IPosition& left, ptrdiff_t val)
+ {
+     Bool result = True;
+     uInt n = left.nelements();
+@@ -864,7 +864,7 @@ Bool operator < (const IPosition& left, ssize_t val)
+     return result;
+ }
+ 
+-Bool operator <= (const IPosition& left, ssize_t val)
++Bool operator <= (const IPosition& left, ptrdiff_t val)
+ {
+     Bool result = True;
+     uInt n = left.nelements();
+@@ -879,7 +879,7 @@ Bool operator <= (const IPosition& left, ssize_t val)
+     return result;
+ }
+ 
+-Bool operator > (const IPosition& left, ssize_t val)
++Bool operator > (const IPosition& left, ptrdiff_t val)
+ {
+     Bool result = True;
+     uInt n = left.nelements();
+@@ -894,7 +894,7 @@ Bool operator > (const IPosition& left, ssize_t val)
+     return result;
+ }
+ 
+-Bool operator >= (const IPosition& left, ssize_t val)
++Bool operator >= (const IPosition& left, ptrdiff_t val)
+ {
+     Bool result = True;
+     uInt n = left.nelements();
+@@ -909,7 +909,7 @@ Bool operator >= (const IPosition& left, ssize_t val)
+     return result;
+ }
+ 
+-Bool operator == (ssize_t val, const IPosition& right)
++Bool operator == (ptrdiff_t val, const IPosition& right)
+ {
+     Bool result = True;
+     uInt n = right.nelements();
+@@ -924,7 +924,7 @@ Bool operator == (ssize_t val, const IPosition& right)
+     return result;
+ }
+ 
+-Bool operator != (ssize_t val, const IPosition& right)
++Bool operator != (ptrdiff_t val, const IPosition& right)
+ {
+     Bool result = False;
+     uInt n = right.nelements();
+@@ -939,7 +939,7 @@ Bool operator != (ssize_t val, const IPosition& right)
+     return result;
+ }
+ 
+-Bool operator < (ssize_t val, const IPosition& right)
++Bool operator < (ptrdiff_t val, const IPosition& right)
+ {
+     Bool result = True;
+     uInt n = right.nelements();
+@@ -954,7 +954,7 @@ Bool operator < (ssize_t val, const IPosition& right)
+     return result;
+ }
+ 
+-Bool operator <= (ssize_t val, const IPosition& right)
++Bool operator <= (ptrdiff_t val, const IPosition& right)
+ {
+     Bool result = True;
+     uInt n = right.nelements();
+@@ -969,7 +969,7 @@ Bool operator <= (ssize_t val, const IPosition& right)
+     return result;
+ }
+ 
+-Bool operator > (ssize_t val, const IPosition& right)
++Bool operator > (ptrdiff_t val, const IPosition& right)
+ {
+     Bool result = True;
+     uInt n = right.nelements();
+@@ -984,7 +984,7 @@ Bool operator > (ssize_t val, const IPosition& right)
+     return result;
+ }
+ 
+-Bool operator >= (ssize_t val, const IPosition& right)
++Bool operator >= (ptrdiff_t val, const IPosition& right)
+ {
+     Bool result = True;
+     uInt n = right.nelements();
+@@ -1095,7 +1095,7 @@ Bool isInsideArray (const IPosition& iposition, const IPosition& shape)
+     }
+ 
+     Bool result = True;
+-    ssize_t ioff;
++    ptrdiff_t ioff;
+ 
+     uInt ndim = shape.nelements();
+     for (uInt idim = 0; idim < ndim; idim++) {
 diff --git a/casa/Arrays/IPosition.h b/casa/Arrays/IPosition.h
-index e6b7121..d35babd 100644
+index e6b7121..47b1aa8 100644
 --- a/casa/Arrays/IPosition.h
 +++ b/casa/Arrays/IPosition.h
-@@ -34,6 +34,7 @@
- #include <casa/BasicSL/String.h>
- #include <vector>
- #include <cstddef>                  // for ptrdiff_t
-+#include <unistd.h>
+@@ -127,15 +127,15 @@ public:
  
- namespace casa { //# NAMESPACE CASA - BEGIN
+     // An IPosition of size "length." The values in the object get
+     // initialized to val.
+-    IPosition(uInt length, ssize_t val);
++    IPosition(uInt length, ptrdiff_t val);
  
+     // An IPosition of size "length" with defined values. You need to supply
+     // a value for each element of the IPosition (up to 10). [Unfortunately
+     // varargs might not be sufficiently portable.]
+-    IPosition (uInt length, ssize_t val0, ssize_t val1, ssize_t val2=MIN_INT, 
+-	       ssize_t val3=MIN_INT, ssize_t val4=MIN_INT, ssize_t val5=MIN_INT,
+-	       ssize_t val6=MIN_INT, ssize_t val7=MIN_INT, ssize_t val8=MIN_INT,
+-	       ssize_t val9=MIN_INT);
++    IPosition (uInt length, ptrdiff_t val0, ptrdiff_t val1, ptrdiff_t val2=MIN_INT,
++	       ptrdiff_t val3=MIN_INT, ptrdiff_t val4=MIN_INT, ptrdiff_t val5=MIN_INT,
++	       ptrdiff_t val6=MIN_INT, ptrdiff_t val7=MIN_INT, ptrdiff_t val8=MIN_INT,
++	       ptrdiff_t val9=MIN_INT);
+ 
+     // Makes a copy (copy, NOT reference, semantics) of other.
+     IPosition(const IPosition& other);
+@@ -148,7 +148,7 @@ public:
+     IPosition& operator=(const IPosition& other);
+ 
+     // Copy "value" into every position of this IPosition.
+-    IPosition& operator=(ssize_t value);
++    IPosition& operator=(ptrdiff_t value);
+ 
+     // Construct a default axis path consisting of the values 0 .. nrdim-1.
+     static IPosition makeAxisPath (uInt nrdim);
+@@ -221,10 +221,10 @@ public:
+     // "index" to ensure it is not out of bounds. If this check fails, an
+     // AipsError will be thrown.
+     // <group>
+-    ssize_t& operator[] (uInt index);
+-    ssize_t operator[]  (uInt index) const;
+-    ssize_t& operator() (uInt index);
+-    ssize_t operator()  (uInt index) const;
++    ptrdiff_t& operator[] (uInt index);
++    ptrdiff_t operator[]  (uInt index) const;
++    ptrdiff_t& operator() (uInt index);
++    ptrdiff_t operator()  (uInt index) const;
+     // </group>
+ 
+     // Index into the IPosition from the end.
+@@ -232,12 +232,12 @@ public:
+     // If the preprocessor symbol AIPS_ARRAY_INDEX_CHECK is defined, it will
+     // check if the index is not out of bounds.
+     // <group>
+-    ssize_t& last (uInt index=0);
+-    ssize_t last (uInt index=0) const;
++    ptrdiff_t& last (uInt index=0);
++    ptrdiff_t last (uInt index=0) const;
+     // </group>
+ 
+     // Get the storage.
+-    const ssize_t *storage() const;
++    const ptrdiff_t *storage() const;
+ 
+     // Append this IPosition with another one (causing a resize).
+     void append (const IPosition& other);
+@@ -292,10 +292,10 @@ public:
+     void operator -= (const IPosition& other);
+     void operator *= (const IPosition& other);
+     void operator /= (const IPosition& other);
+-    void operator += (ssize_t val);
+-    void operator -= (ssize_t val);
+-    void operator *= (ssize_t val);
+-    void operator /= (ssize_t val);
++    void operator += (ptrdiff_t val);
++    void operator -= (ptrdiff_t val);
++    void operator *= (ptrdiff_t val);
++    void operator /= (ptrdiff_t val);
+     // </group>
+ 
+     // Returns 0 if nelements() == 0, otherwise it returns the product of
+@@ -362,9 +362,9 @@ public:
+     // <group name=STL-iterator>
+     // STL-style typedefs.
+     // <group>
+-    typedef ssize_t               value_type;
+-    typedef ssize_t*              iterator;
+-    typedef const ssize_t*        const_iterator;
++    typedef ptrdiff_t               value_type;
++    typedef ptrdiff_t*              iterator;
++    typedef const ptrdiff_t*        const_iterator;
+     typedef value_type*       pointer;
+     typedef const value_type* const_pointer; 
+     typedef value_type&       reference;
+@@ -395,10 +395,10 @@ private:
+ 
+     enum { BufferLength = 4 };
+     uInt size_p;
+-    ssize_t buffer_p[BufferLength];
++    ptrdiff_t buffer_p[BufferLength];
+     // When the iposition is length BufferSize or less data is just buffer_p,
+     // avoiding calls to new and delete.
+-    ssize_t *data_p;
++    ptrdiff_t *data_p;
+ };
+ 
+ // <summary>Arithmetic Operations for IPosition's</summary>
+@@ -416,17 +416,17 @@ IPosition operator / (const IPosition& left, const IPosition& right);
+ // Each operation is done by appliying the integer argument to all elements
+ // of the IPosition argument. 
+ // <group>
+-IPosition operator + (const IPosition& left, ssize_t val);
+-IPosition operator - (const IPosition& left, ssize_t val);
+-IPosition operator * (const IPosition& left, ssize_t val);
+-IPosition operator / (const IPosition& left, ssize_t val);
++IPosition operator + (const IPosition& left, ptrdiff_t val);
++IPosition operator - (const IPosition& left, ptrdiff_t val);
++IPosition operator * (const IPosition& left, ptrdiff_t val);
++IPosition operator / (const IPosition& left, ptrdiff_t val);
+ // </group>
+ // Same functions as above but with with the Int argument on the left side.
+ // <group>
+-IPosition operator + (ssize_t val, const IPosition& right);
+-IPosition operator - (ssize_t val, const IPosition& right);
+-IPosition operator * (ssize_t val, const IPosition& right);
+-IPosition operator / (ssize_t val, const IPosition& right);
++IPosition operator + (ptrdiff_t val, const IPosition& right);
++IPosition operator - (ptrdiff_t val, const IPosition& right);
++IPosition operator * (ptrdiff_t val, const IPosition& right);
++IPosition operator / (ptrdiff_t val, const IPosition& right);
+ // </group>
+ 
+ // Returns the element by element minimum or maximum.
+@@ -453,21 +453,21 @@ Bool operator >= (const IPosition& left, const IPosition& right);
+ // </group>
+ // Each operation is done by appliying the integer argument to all elements
+ // <group>
+-Bool operator == (const IPosition& left, ssize_t val);
+-Bool operator != (const IPosition& left, ssize_t val);
+-Bool operator <  (const IPosition& left, ssize_t val);
+-Bool operator <= (const IPosition& left, ssize_t val);
+-Bool operator >  (const IPosition& left, ssize_t val);
+-Bool operator >= (const IPosition& left, ssize_t val);
++Bool operator == (const IPosition& left, ptrdiff_t val);
++Bool operator != (const IPosition& left, ptrdiff_t val);
++Bool operator <  (const IPosition& left, ptrdiff_t val);
++Bool operator <= (const IPosition& left, ptrdiff_t val);
++Bool operator >  (const IPosition& left, ptrdiff_t val);
++Bool operator >= (const IPosition& left, ptrdiff_t val);
+ // </group>
+ // Same functions as above but with with the Int argument on the left side.
+ // <group>
+-Bool operator == (ssize_t val, const IPosition& right);
+-Bool operator != (ssize_t val, const IPosition& right);
+-Bool operator <  (ssize_t val, const IPosition& right);
+-Bool operator <= (ssize_t val, const IPosition& right);
+-Bool operator >  (ssize_t val, const IPosition& right);
+-Bool operator >= (ssize_t val, const IPosition& right);
++Bool operator == (ptrdiff_t val, const IPosition& right);
++Bool operator != (ptrdiff_t val, const IPosition& right);
++Bool operator <  (ptrdiff_t val, const IPosition& right);
++Bool operator <= (ptrdiff_t val, const IPosition& right);
++Bool operator >  (ptrdiff_t val, const IPosition& right);
++Bool operator >= (ptrdiff_t val, const IPosition& right);
+ // </group>
+ // </group>
+ 
+@@ -528,17 +528,17 @@ inline Bool IPosition::empty() const
+     return size_p == 0;
+ }
+ 
+-inline ssize_t& IPosition::operator[](uInt index)
++inline ptrdiff_t& IPosition::operator[](uInt index)
+ {
+     return data_p[index];
+ }
+ 
+-inline ssize_t IPosition::operator[](uInt index) const
++inline ptrdiff_t IPosition::operator[](uInt index) const
+ {
+     return data_p[index];
+ }
+ 
+-inline ssize_t& IPosition::operator()(uInt index)
++inline ptrdiff_t& IPosition::operator()(uInt index)
+ {
+ #if defined(AIPS_ARRAY_INDEX_CHECK)
+     if (index >= nelements()) {
+@@ -548,7 +548,7 @@ inline ssize_t& IPosition::operator()(uInt index)
+     return data_p[index];
+ }
+ 
+-inline ssize_t IPosition::operator()(uInt index) const
++inline ptrdiff_t IPosition::operator()(uInt index) const
+ {
+ #if defined(AIPS_ARRAY_INDEX_CHECK)
+     if (index >= nelements()) {
+@@ -558,7 +558,7 @@ inline ssize_t IPosition::operator()(uInt index) const
+     return data_p[index];
+ }
+ 
+-inline ssize_t& IPosition::last (uInt index)
++inline ptrdiff_t& IPosition::last (uInt index)
+ {
+ #if defined(AIPS_ARRAY_INDEX_CHECK)
+     if (size_p - index <= 0) {
+@@ -568,7 +568,7 @@ inline ssize_t& IPosition::last (uInt index)
+     return data_p[size_p-index-1];
+ }
+ 
+-inline ssize_t IPosition::last (uInt index) const
++inline ptrdiff_t IPosition::last (uInt index) const
+ {
+ #if defined(AIPS_ARRAY_INDEX_CHECK)
+     if (size_p - index <= 0) {
+@@ -578,7 +578,7 @@ inline ssize_t IPosition::last (uInt index) const
+     return data_p[size_p-index-1];
+ }
+ 
+-inline const ssize_t *IPosition::storage() const
++inline const ptrdiff_t *IPosition::storage() const
+ {
+     return data_p;
+ }
+diff --git a/casa/Arrays/IPosition2.cc b/casa/Arrays/IPosition2.cc
+index a0129ca..5770feb 100644
+--- a/casa/Arrays/IPosition2.cc
++++ b/casa/Arrays/IPosition2.cc
+@@ -87,7 +87,7 @@ LogIO& operator<< (LogIO& os, const IPosition& ip)
+ AipsIO& operator<< (AipsIO& aio, const IPosition& ip)
+ {
+   Bool use32 = True;
+-  if (sizeof(ssize_t) > 4) {
++  if (sizeof(ptrdiff_t) > 4) {
+     for (uInt i=0; i<ip.size_p; ++i) {
+       if (ip[i] > 2147483647) {
+         use32 = False;
+@@ -131,9 +131,9 @@ AipsIO& operator>> (AipsIO& aio, IPosition& ip)
+     }
+   } else if (vers == 2) {
+     Int64 v;
+-    if (sizeof(ssize_t) <= 4) {
++    if (sizeof(ptrdiff_t) <= 4) {
+       throw AipsError ("AipsIO& operator>>(AipsIO& aio, IPosition& ip) - "
+-                       "cannot read back in an ssize_t of 4 bytes");
++                       "cannot read back in an ptrdiff_t of 4 bytes");
+     }
+     for (uInt i=0; i<nel; ++i) {
+       aio >> v;
+diff --git a/casa/Arrays/Slice.h b/casa/Arrays/Slice.h
+index 5efc908..242f1f3 100644
+--- a/casa/Arrays/Slice.h
++++ b/casa/Arrays/Slice.h
+@@ -29,7 +29,7 @@
+ #define CASA_SLICE_H
+ 
+ #include <casa/aips.h>
+-#include <unistd.h>         //# for ssize_t
++#include <cstddef>         //# for ptrdiff_t
+ 
+ #if defined(AIPS_DEBUG)
+ #include <casa/Utilities/Assert.h>
+@@ -133,7 +133,7 @@ private:
+     //# incp < 0 is chosen as the flag since the user can set inc to be zero
+     //# although that is an error that can be caught if AIPS_DEBUG is defined).
+     size_t  startp;
+-    ssize_t incp;
++    ptrdiff_t incp;
+     size_t  lengthp;
+ };
+ 
+diff --git a/casa/Arrays/Slicer.cc b/casa/Arrays/Slicer.cc
+index 0e7eb32..acd234c 100644
+--- a/casa/Arrays/Slicer.cc
++++ b/casa/Arrays/Slicer.cc
+@@ -204,8 +204,8 @@ void Slicer::fillFixed()
+     }
+ }
+ 
+-void Slicer::fillSlice (const Slice& sl, ssize_t& start, ssize_t& len,
+-                        ssize_t& stride)
++void Slicer::fillSlice (const Slice& sl, ptrdiff_t& start, ptrdiff_t& len,
++                        ptrdiff_t& stride)
+ {
+     //# Initialized values will do in case an "entire" slice is given.
+     if (!sl.all()) {
+diff --git a/casa/Arrays/Slicer.h b/casa/Arrays/Slicer.h
+index 5d20fdc..1cbe45c 100644
+--- a/casa/Arrays/Slicer.h
++++ b/casa/Arrays/Slicer.h
+@@ -402,11 +402,11 @@ private:
+     IPosition    len_p;         // Length of input
+     Bool         fixed_p;       // no MimicSource used
+ 
+-    // Define a private constructor taking an ssize_t.
++    // Define a private constructor taking an ptrdiff_t.
+     // This is to prevent the user from the unexpected and meaningless
+-    // Slicer that would result when the ssize_t argument is promoted to
++    // Slicer that would result when the ptrdiff_t argument is promoted to
+     // an IPosition.
+-    Slicer (ssize_t);
++    Slicer (ptrdiff_t);
+ 
+     // Check the given start, end/length and stride.
+     // Fill in the length or end.
+@@ -414,8 +414,8 @@ private:
+     void fillEndLen();
+ 
+     // Fill in start, len and stride from a Slice.
+-    void fillSlice (const Slice&, ssize_t& start, ssize_t& length,
+-                    ssize_t& stride);
++    void fillSlice (const Slice&, ptrdiff_t& start, ptrdiff_t& length,
++                    ptrdiff_t& stride);
+ 
+     // Fill the fixed flag.
+     void fillFixed();
+diff --git a/casa/Arrays/VectorSTLIterator.h b/casa/Arrays/VectorSTLIterator.h
+index a2fe3a2..032eb9d 100644
+--- a/casa/Arrays/VectorSTLIterator.h
++++ b/casa/Arrays/VectorSTLIterator.h
+@@ -81,14 +81,14 @@ class VectorSTLIterator
+   // <group>
+   explicit VectorSTLIterator(const Vector<T> &c)
+     : start_p(const_cast<T*>(c.data())), 
+-      step_p (std::max(ssize_t(1), c.steps()(0))),
++      step_p (std::max(ptrdiff_t(1), c.steps()(0))),
+       iter_p (const_cast<T*>(c.data()))
+   {}
+   VectorSTLIterator() : start_p(0), step_p(1), iter_p(0)
+   {}
+   VectorSTLIterator(const typename Array<T>::IteratorSTL &c)
+     : start_p(c.pos()), 
+-      step_p (std::max(ssize_t(1), c.steps()(0))),
++      step_p (std::max(ptrdiff_t(1), c.steps()(0))),
+       iter_p (start_p)
+   {}
+   // Copy constructor.
+diff --git a/lattices/Lattices/LCExtension.cc b/lattices/Lattices/LCExtension.cc
+index 79ef5b2..1ff3f42 100644
+--- a/lattices/Lattices/LCExtension.cc
++++ b/lattices/Lattices/LCExtension.cc
+@@ -208,7 +208,7 @@ void LCExtension::fill (const IPosition& extendAxes, const LCBox& extendBox)
+     Vector<Float> boxLatBlc(nre);
+     Vector<Float> boxLatTrc(nre);
+     Vector<uInt> reginx(nre);
+-    GenSortIndirect<ssize_t>::sort (reginx, extendAxes.storage(), nre);
++    GenSortIndirect<ptrdiff_t>::sort (reginx, extendAxes.storage(), nre);
+     Int first = -1;
+     for (uInt i=0; i<nre; i++) {
+         uInt axis = reginx(i);
+diff --git a/lattices/Lattices/LCStretch.cc b/lattices/Lattices/LCStretch.cc
+index 6f5eb43..470d19b 100644
+--- a/lattices/Lattices/LCStretch.cc
++++ b/lattices/Lattices/LCStretch.cc
+@@ -182,7 +182,7 @@ void LCStretch::fill (const IPosition& stretchAxes, const LCBox& stretchBox)
+     Vector<Float> boxLatBlc(nrs);
+     Vector<Float> boxLatTrc(nrs);
+     Vector<uInt> reginx(nrs);
+-    GenSortIndirect<ssize_t>::sort (reginx, stretchAxes.storage(), nrs);
++    GenSortIndirect<ptrdiff_t>::sort (reginx, stretchAxes.storage(), nrs);
+     Int first = -1;
+     for (uInt i=0; i<nrs; i++) {
+         uInt axis = reginx(i);
+diff --git a/lattices/Lattices/RebinLattice.tcc b/lattices/Lattices/RebinLattice.tcc
+index e667b8b..0e601e7 100644
+--- a/lattices/Lattices/RebinLattice.tcc
++++ b/lattices/Lattices/RebinLattice.tcc
+@@ -424,8 +424,8 @@ Slicer RebinLattice<T>::findOriginalSlicer (const Slicer& section) const
+       blcOrig[i] = blc[i] * itsBin[i];
+       trcOrig[i] = trc[i] * itsBin[i] + (itsBin[i] - 1);
+ //
+-      blcOrig[i] = std::max(ssize_t(0), std::min(blcOrig[i], shapeOrig[i]-1));
+-      trcOrig[i] = std::max(ssize_t(0), std::min(trcOrig[i], shapeOrig[i]-1));
++      blcOrig[i] = std::max(ptrdiff_t(0), std::min(blcOrig[i], shapeOrig[i]-1));
++      trcOrig[i] = std::max(ptrdiff_t(0), std::min(trcOrig[i], shapeOrig[i]-1));
+    }
+ //
+    IPosition strideOrig(nDim,1);
+diff --git a/scimath/Mathematics/ConvolveGridder.tcc b/scimath/Mathematics/ConvolveGridder.tcc
+index 3bf8e83..5c74666 100644
+--- a/scimath/Mathematics/ConvolveGridder.tcc
++++ b/scimath/Mathematics/ConvolveGridder.tcc
+@@ -305,11 +305,11 @@ Bool ConvolveGridder<Domain, Range>::grid(Array<Range> &gridded,
+ 				    const Vector<Domain>& p,
+ 				    const Range& value)
+ {
+-  loc=location(loc,p);
++  loc=this->location(loc,p);
+   loc-=offsetVec;
+   if(onGrid(loc,supportVec)) {
+     Bool del;
+-    posVec=position(posVec, p);
++    posVec=this->position(posVec, p);
+     const IPosition& fs = gridded.shape();
+     vector<Int> s(fs.begin(), fs.end());
+     switch(loc.nelements()) {
+@@ -345,10 +345,10 @@ Bool ConvolveGridder<Domain, Range>::degrid(const Array<Range> &gridded,
+ 				    const Vector<Domain>& p,
+ 				    Range& value)
+ {
+-  loc=location(loc,p); 
+- if(onGrid(loc,supportVec)) {
++  loc=this->location(loc,p);
++  if(onGrid(loc,supportVec)) {
+     Bool del;
+-    posVec=position(posVec, p);
++    posVec=this->position(posVec, p);
+     const IPosition& fs = gridded.shape();
+     vector<Int> s(fs.begin(), fs.end());
+     switch(loc.nelements()) {
 -- 
 1.7.10.4
 
