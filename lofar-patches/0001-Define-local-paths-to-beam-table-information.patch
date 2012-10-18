@@ -1,6 +1,6 @@
-From 9bd9213824374ac6b29e5304861a9d5b8695ad4e Mon Sep 17 00:00:00 2001
+From db93d93c5afb93c63b1a35f5dcfcaeff98868318 Mon Sep 17 00:00:00 2001
 From: John Swinbank <swinbank@transientskp.org>
-Date: Tue, 17 Jul 2012 11:38:35 +0200
+Date: Thu, 18 Oct 2012 10:58:59 +0200
 Subject: [PATCH] Define local paths to beam table information
 
 ---
@@ -12,11 +12,11 @@ Subject: [PATCH] Define local paths to beam table information
  create mode 100644 LCS/MSLofar/src/makebeamtables.cc.cmake
 
 diff --git a/LCS/MSLofar/src/CMakeLists.txt b/LCS/MSLofar/src/CMakeLists.txt
-index 3a3bd46..e797b3f 100644
+index e01ed53..c10690f 100644
 --- a/LCS/MSLofar/src/CMakeLists.txt
 +++ b/LCS/MSLofar/src/CMakeLists.txt
-@@ -22,6 +22,8 @@ lofar_add_library(mslofar
-   BeamTables.cc
+@@ -23,6 +23,8 @@ lofar_add_library(mslofar
+   FailedTileInfo.cc
  )
  
 +configure_file(makebeamtables.cc.cmake makebeamtables.cc)
@@ -26,7 +26,7 @@ index 3a3bd46..e797b3f 100644
  
 diff --git a/LCS/MSLofar/src/makebeamtables.cc b/LCS/MSLofar/src/makebeamtables.cc
 deleted file mode 100644
-index 7f44dbb..0000000
+index 1d4661a..0000000
 --- a/LCS/MSLofar/src/makebeamtables.cc
 +++ /dev/null
 @@ -1,87 +0,0 @@
@@ -106,7 +106,7 @@ index 7f44dbb..0000000
 -    }
 -    ASSERTSTR (!antSet.empty(), "No LOFAR_ANTENNA_SET found in OBSERVATION"
 -               " subtable of " << msName);
--   BeamTables::create (ms, overwrite);
+-    BeamTables::create (ms, overwrite);
 -    BeamTables::fill   (ms, antSet, antSetFile, antFieldDir, hbaDeltaDir, true);
 -  } catch (Exception& x) {
 -    cerr << "Unexpected LOFAR exception: " << x << endl;
@@ -119,7 +119,7 @@ index 7f44dbb..0000000
 -}
 diff --git a/LCS/MSLofar/src/makebeamtables.cc.cmake b/LCS/MSLofar/src/makebeamtables.cc.cmake
 new file mode 100644
-index 0000000..c3f7865
+index 0000000..bbd37f9
 --- /dev/null
 +++ b/LCS/MSLofar/src/makebeamtables.cc.cmake
 @@ -0,0 +1,87 @@
@@ -199,7 +199,7 @@ index 0000000..c3f7865
 +    }
 +    ASSERTSTR (!antSet.empty(), "No LOFAR_ANTENNA_SET found in OBSERVATION"
 +               " subtable of " << msName);
-+   BeamTables::create (ms, overwrite);
++    BeamTables::create (ms, overwrite);
 +    BeamTables::fill   (ms, antSet, antSetFile, antFieldDir, hbaDeltaDir, true);
 +  } catch (Exception& x) {
 +    cerr << "Unexpected LOFAR exception: " << x << endl;
