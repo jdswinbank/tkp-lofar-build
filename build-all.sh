@@ -45,12 +45,12 @@ done
 update_source "casacore" $CASACOREROOT $CASACORE_REVISION
 CASACORE_VERSION=$VERSION
 echo "Applying local patches."
-for patchfile in $PATCHES/casacore-patches/*patch
-do
-    echo $patchfile
-    git apply $patchfile
-    check_result "casacore" "git apply $patchfile" $TARGET $?
-done
+#for patchfile in $PATCHES/casacore-patches/*patch
+#do
+#    echo $patchfile
+#    git apply $patchfile
+#    check_result "casacore" "git apply $patchfile" $TARGET $?
+#done
 echo "Configuring casacore r$CASACORE_VERSION."
 mkdir -p $CASACOREROOT/build/opt
 cd $CASACOREROOT/build/opt
