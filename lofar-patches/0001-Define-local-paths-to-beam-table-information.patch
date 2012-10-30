@@ -1,18 +1,18 @@
-From db93d93c5afb93c63b1a35f5dcfcaeff98868318 Mon Sep 17 00:00:00 2001
+From 1a041eb4c0b2eae2ed3f9b2f62e91586867f8b1b Mon Sep 17 00:00:00 2001
 From: John Swinbank <swinbank@transientskp.org>
-Date: Thu, 18 Oct 2012 10:58:59 +0200
+Date: Tue, 30 Oct 2012 11:05:06 +0100
 Subject: [PATCH] Define local paths to beam table information
 
 ---
  LCS/MSLofar/src/CMakeLists.txt          |    2 +
- LCS/MSLofar/src/makebeamtables.cc       |   87 -------------------------------
- LCS/MSLofar/src/makebeamtables.cc.cmake |   87 +++++++++++++++++++++++++++++++
- 3 files changed, 89 insertions(+), 87 deletions(-)
+ LCS/MSLofar/src/makebeamtables.cc       |   92 -------------------------------
+ LCS/MSLofar/src/makebeamtables.cc.cmake |   92 +++++++++++++++++++++++++++++++
+ 3 files changed, 94 insertions(+), 92 deletions(-)
  delete mode 100644 LCS/MSLofar/src/makebeamtables.cc
  create mode 100644 LCS/MSLofar/src/makebeamtables.cc.cmake
 
 diff --git a/LCS/MSLofar/src/CMakeLists.txt b/LCS/MSLofar/src/CMakeLists.txt
-index e01ed53..c10690f 100644
+index 1d41787..dc8413c 100644
 --- a/LCS/MSLofar/src/CMakeLists.txt
 +++ b/LCS/MSLofar/src/CMakeLists.txt
 @@ -23,6 +23,8 @@ lofar_add_library(mslofar
@@ -23,13 +23,13 @@ index e01ed53..c10690f 100644
 +
  lofar_add_bin_program(versionmslofar versionmslofar.cc)
  lofar_add_bin_program(makebeamtables makebeamtables.cc)
- 
+ lofar_add_bin_program(addfailedtileinfo addfailedtileinfo.cc)
 diff --git a/LCS/MSLofar/src/makebeamtables.cc b/LCS/MSLofar/src/makebeamtables.cc
 deleted file mode 100644
-index 1d4661a..0000000
+index 4f20a3d..0000000
 --- a/LCS/MSLofar/src/makebeamtables.cc
 +++ /dev/null
-@@ -1,87 +0,0 @@
+@@ -1,92 +0,0 @@
 -//# makebeamtables.cc: Program 
 -//# Copyright (C) 2011
 -//# ASTRON (Netherlands Institute for Radio Astronomy)
@@ -55,7 +55,10 @@ index 1d4661a..0000000
 -
 -#include <lofar_config.h>
 -#include <MSLofar/BeamTables.h>
--#include <casa/Inputs.h>
+-#include <MSLofar/Package__Version.h>
+-#include <Common/InputParSet.h>
+-#include <Common/SystemUtil.h>
+-#include <Common/LofarLogger.h>
 -#include <tables/Tables/ScalarColumn.h>
 -#include <ms/MeasurementSets/MeasurementSet.h>
 -
@@ -64,10 +67,12 @@ index 1d4661a..0000000
 -
 -int main (int argc, char* argv[])
 -{
+-  TEST_SHOW_VERSION (argc, argv, MSLofar);
+-  INIT_LOGGER(basename(string(argv[0])));
 -  try {
--    Input inputs(1);
+-    InputParSet inputs;
 -    // define the input structure
--    inputs.version("2011Mar31-GvD");
+-    inputs.setVersion("2012Oct29-GvD");
 -    inputs.create ("ms", "",
 -		   "Name of MeasurementSet",
 -		   "string");
@@ -84,7 +89,7 @@ index 1d4661a..0000000
 -		   "Directory where the iHBADelta.conf files reside",
 -		   "string");
 -    inputs.create ("overwrite", "false",
--                   "Overwriting existing beam subtables?"
+-                   "Overwriting existing beam subtables?",
 -                   "bool");
 -    inputs.readArguments (argc, argv);
 -    String msName      = inputs.getString("ms");
@@ -119,10 +124,10 @@ index 1d4661a..0000000
 -}
 diff --git a/LCS/MSLofar/src/makebeamtables.cc.cmake b/LCS/MSLofar/src/makebeamtables.cc.cmake
 new file mode 100644
-index 0000000..bbd37f9
+index 0000000..03731fc
 --- /dev/null
 +++ b/LCS/MSLofar/src/makebeamtables.cc.cmake
-@@ -0,0 +1,87 @@
+@@ -0,0 +1,92 @@
 +//# makebeamtables.cc: Program 
 +//# Copyright (C) 2011
 +//# ASTRON (Netherlands Institute for Radio Astronomy)
@@ -148,7 +153,10 @@ index 0000000..bbd37f9
 +
 +#include <lofar_config.h>
 +#include <MSLofar/BeamTables.h>
-+#include <casa/Inputs.h>
++#include <MSLofar/Package__Version.h>
++#include <Common/InputParSet.h>
++#include <Common/SystemUtil.h>
++#include <Common/LofarLogger.h>
 +#include <tables/Tables/ScalarColumn.h>
 +#include <ms/MeasurementSets/MeasurementSet.h>
 +
@@ -157,10 +165,12 @@ index 0000000..bbd37f9
 +
 +int main (int argc, char* argv[])
 +{
++  TEST_SHOW_VERSION (argc, argv, MSLofar);
++  INIT_LOGGER(basename(string(argv[0])));
 +  try {
-+    Input inputs(1);
++    InputParSet inputs;
 +    // define the input structure
-+    inputs.version("2011Mar31-GvD");
++    inputs.setVersion("2012Oct29-GvD");
 +    inputs.create ("ms", "",
 +		   "Name of MeasurementSet",
 +		   "string");
@@ -177,7 +187,7 @@ index 0000000..bbd37f9
 +		   "Directory where the iHBADelta.conf files reside",
 +		   "string");
 +    inputs.create ("overwrite", "false",
-+                   "Overwriting existing beam subtables?"
++                   "Overwriting existing beam subtables?",
 +                   "bool");
 +    inputs.readArguments (argc, argv);
 +    String msName      = inputs.getString("ms");
