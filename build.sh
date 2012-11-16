@@ -7,6 +7,10 @@ HEASTRO1=jds@heastro1.science.uva.nl
 
 # Location of sources
 SOURCE=/var/scratch/swinbank/src
+WCSLIB_VERSION=4.16
+CFITSIO_VERSION=3310
+QT_VERSION=4.8.3
+CPPUNIT_VERSION=1.13.1
 
 # Target directory for installation
 TARGET=/var/scratch/swinbank/sw
@@ -37,13 +41,13 @@ mkdir -p $SOURCE
 # Download & build wcslib
 echo "Fetching wcslib"
 cd $SOURCE
-rm -rf wcslib-4.13.4
-if [ ! -f wcslib-4.13.4.tar.bz2 ]; then
-    wget ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib-4.13.4.tar.bz2
+rm -rf wcslib-${WCSLIB_VERSION}
+if [ ! -f wcslib-${WCSLIB_VERSION}.tar.bz2 ]; then
+    wget ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib-${WCSLIB_VERSION}.tar.bz2
 fi
-tar jxvf wcslib-4.13.4.tar.bz2
+tar jxvf wcslib-${WCSLIB_VERSION}.tar.bz2
 echo "Configuring wcslib"
-cd wcslib-4.13.4
+cd wcslib-${WCSLIB_VERSION}
 mkdir -p $WCSLIB_TARGET
 ./configure --prefix=$WCSLIB_TARGET
 echo "Building wcslib"
@@ -55,10 +59,10 @@ make install
 echo "Fetching cfitsio"
 cd $SOURCE
 rm -rf cfitsio
-if [ ! -f cfitsio3290.tar.gz ]; then
-    wget ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3290.tar.gz
+if [ ! -f cfitsio${CFITSIO_VERSION}.tar.gz ]; then
+    wget ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio${CFITSIO_VERSION}.tar.gz
 fi
-tar zxvf cfitsio3290.tar.gz
+tar zxvf cfitsio${CFITSIO_VERSION}.tar.gz
 echo "Configuring cfitsio"
 cd cfitsio
 mkdir -p $CFITSIO_TARGET
@@ -153,13 +157,13 @@ echo "Built & installed LofIm."
 
 echo "Fetching Qt"
 cd $SOURCE
-rm -rf qt-everywhere-opensource-src-4.8.1
-if [ ! -f qt-everywhere-opensource-src-4.8.1.tar.gz ]; then
-    wget http://download.qt.nokia.com/qt/source/qt-everywhere-opensource-src-4.8.1.tar.gz
+rm -rf qt-everywhere-opensource-src-${QT_VERSION}
+if [ ! -f qt-everywhere-opensource-src-${QT_VERSION}.tar.gz ]; then
+    wget http://download.qt.nokia.com/qt/source/qt-everywhere-opensource-src-${QT_VERSION}.tar.gz
 fi
-tar zxvf qt-everywhere-opensource-src-4.8.1.tar.gz
+tar zxvf qt-everywhere-opensource-src-${QT_VERSION}.tar.gz
 echo "Configuring Qt"
-cd qt-everywhere-opensource-src-4.8.1
+cd qt-everywhere-opensource-src-${QT_VERSION}
 mkdir -p $QT_TARGET
 echo "yes" | ./configure -opensource -prefix $QT_TARGET
 echo "Building Qt"
@@ -169,12 +173,12 @@ make install
 
 echo "Fetching CppUnit"
 cd $SOURCE
-rm -rf cppunit-1.12.1
-if [ ! -f cppunit-1.12.1.tar.gz ]; then
-    wget http://downloads.sourceforge.net/cppunit/cppunit-1.12.1.tar.gz
+rm -rf cppunit-${CPPUNIT_VERSION}
+if [ ! -f cppunit-${CPPUNIT_VERSION}.tar.gz ]; then
+    wget http://downloads.sourceforge.net/cppunit/cppunit-${CPPUNIT_VERSION}.tar.gz
 fi
-tar zxvf cppunit-1.12.1.tar.gz
-cd cppunit-1.12.1
+tar zxvf cppunit-${CPPUNIT_VERSION}.tar.gz
+cd cppunit-${CPPUNIT_VERSION}
 echo "Configuring CppUnit"
 ./configure --prefix=$CPPUNIT_TARGET
 echo "Building CppUnit"
