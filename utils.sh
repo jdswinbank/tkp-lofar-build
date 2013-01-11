@@ -11,8 +11,8 @@ check_result() {
     then
         message="$STEP failed: returned value $RESULT"
         echo $message
-        send_mail $COMPONENT "$message"
-        rm -rf $TARGET
+#        send_mail $COMPONENT "$message"
+#        rm -rf $TARGET
         exit 1
     fi
 }
@@ -25,11 +25,13 @@ update_source() {
     echo "Updating $SOURCENAME sources."
     git clean -df
     git checkout -f master
-    git svn rebase
+    git pull
+ #   git svn rebase
     if [ $REVISION ]
     then
         echo "Checking out r$REVISION."
         git checkout `git svn find-rev r$REVISION`
     fi
-    VERSION=`git svn find-rev HEAD`
+#   VERSION=`git svn find-rev HEAD`
+    VERSION=trunk
 }

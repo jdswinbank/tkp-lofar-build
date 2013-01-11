@@ -1,45 +1,33 @@
 #!/bin/sh
 
 # Target directory for installation
-TARGET=/opt/archive/`date +%F-%H-%M`
+TARGET=$HOME/sw #/opt/archive/`date +%F-%H-%M`
 echo "Installing into $TARGET."
-CASACORE_TARGET=$TARGET/casacore
-CASAREST_TARGET=$TARGET/casarest
-PYRAP_TARGET=$TARGET/pyrap
+CASACORE_TARGET=$TARGET
+CASAREST_TARGET=$TARGET
+PYRAP_TARGET=$TARGET
 PYRAP_PYTHON_TARGET=$PYRAP_TARGET/lib/python2.6/dist-packages
-LOFAR_TARGET=$TARGET/LofIm
+LOFAR_TARGET=$TARGET
 
 # Locations of checked-out source
-CASACOREROOT=/var/scratch/casacore
-CASARESTROOT=/var/scratch/casarest
-PYRAPROOT=/var/scratch/pyrap
-LOFARROOT=/var/scratch/LOFAR
+CASACOREROOT=$HOME/sources/casacore
+CASARESTROOT=$HOME/sources/casarest
+PYRAPROOT=$HOME/sources/pyrap
+LOFARROOT=$HOME/sources/LOFAR
 
 # Base directory for local patches
 PATCHES=$(cd $(dirname "$0"); pwd)
 
 # LOFARSOFT packages to be built
-LOFARPACKAGES=Offline\;LofarFT\;Deployment\;SPW_Combine
+LOFARPACKAGES=Offline\;LofarFT\;StaticMetaData\;SPW_Combine
 #LOFARPACKAGES="pyparameterset BBSControl BBSTools ExpIon pystationresponse pyparmdb MWImager DPPP AOFlagger LofarStMan MSLofar Pipeline"
 
 # Locations of dependencies
-WCSLIBROOT=/opt/archive/wcslib/4.8.2
-DATADIR=/opt/measures/data
+WCSLIBROOT=$HOME/sw
+DATADIR=$HOME/sw/share/measures/data
 
 # Pull in some utility functions
 . `dirname ${0}`/utils.sh
-
-# Optional command line arguments to specify revision to build.
-while getopts l:c:r:p: optionName
-do
-    case $optionName in
-        l) LOFAR_REVISION=$OPTARG;;
-        c) CASACORE_REVISION=$OPTARG;;
-        r) CASAREST_REVISION=$OPTARG;;
-        p) PYRAP_REVISION=$OPTARG;;
-        \?) exit 1;;
-    esac
-done
 
 # Update & build casacore
 update_source "casacore" $CASACOREROOT $CASACORE_REVISION
@@ -136,6 +124,7 @@ cmake -DCASACORE_ROOT_DIR=$CASACORE_TARGET \
     -DBUILD_PACKAGES=$LOFARPACKAGES        \
     -DCMAKE_INSTALL_PREFIX=$LOFAR_TARGET   \
     -DUSE_LOG4CPLUS=OFF                    \
+    -DUSE_PQXX=OFF                         \
     -DUSE_OPENMP=ON                        \
     $LOFARROOT
 echo "Building LofIm."
@@ -146,53 +135,33 @@ make install
 check_result "LofIm" "make install" $TARGET $?
 echo "Built & installed LofIm r$LOFAR_VERSION."
 
-echo "Copying cookbook tools to local host."
-rsync -r lhn001:/opt/cep/tools/cookbook $TARGET
-check_result "Cookbook tools" "rsync" $TARGET $?
+#echo "Copying cookbook tools to local host."
+#rsync -r lhn001:/opt/cep/tools/cookbook $TARGET
+#check_result "Cookbook tools" "rsync" $TARGET $?
 
 echo "Generating init.sh."
 INITFILE=$TARGET/init.sh
 cat > $INITFILE <<-END
-# wcslib
-export LD_LIBRARY_PATH=$WCSLIBROOT/lib\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}
-export PATH=$WCSLIBROOT/bin\${PATH:+:\${PATH}}
-
-# casacore
-export LD_LIBRARY_PATH=$CASACORE_TARGET/lib\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}
-export PATH=$CASACORE_TARGET/bin\${PATH:+:\${PATH}}
-
-# casarest
-export LD_LIBRARY_PATH=$CASAREST_TARGET/lib\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}
-export PATH=$CASAREST_TARGET/bin\${PATH:+:\${PATH}}
-
-# pyrap
-export LD_LIBRARY_PATH=$PYRAP_TARGET/lib\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}
-export PYTHONPATH=$PYRAP_PYTHON_TARGET\${PYTHONPATH:+:\${PYTHONPATH}}
-
-# cookbook tools
-export PATH=$TARGET/cookbook\${PATH:+:\${PATH}}
+export LD_LIBRARY_PATH=$TARGET/lib\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}
+export PATH=$TARGET/bin\${PATH:+:\${PATH}}
+export PYTHONPATH=$TARGET/lib/python2.6/dist-packages\${PYTHONPATH:+:\${PYTHONPATH}}
 
 # LofIm
 . $LOFAR_TARGET/lofarinit.sh
-# Required to use gsm.py on heastro1
-export PYTHONPATH=/opt/monetdb/lib/python2.6/site-packages\${PYTHONPATH:+:\${PYTHONPATH}}
-
-# Casapy
-export PATH=/opt/casapy\${PATH:+:\${PATH}}
 END
 
-# Install this build as the default
-rm /opt/archive/init.sh
-ln -s $INITFILE /opt/archive/init.sh
-
-# Install symlinks for backwards compatibility
-rm /opt/archive/casacore/default
-ln -s $CASACORE_TARGET /opt/archive/casacore/default
-rm /opt/archive/casarest/default
-ln -s $CASAREST_TARGET /opt/archive/casarest/default
-rm /opt/archive/pyrap/default
-ln -s $PYRAP_TARGET /opt/archive/pyrap/default
-rm /opt/archive/lofim/default
-ln -s $LOFAR_TARGET /opt/archive/lofim/default
+## Install this build as the default
+#rm /opt/archive/init.sh
+#ln -s $INITFILE /opt/archive/init.sh
+#
+## Install symlinks for backwards compatibility
+#rm /opt/archive/casacore/default
+#ln -s $CASACORE_TARGET /opt/archive/casacore/default
+#rm /opt/archive/casarest/default
+#ln -s $CASAREST_TARGET /opt/archive/casarest/default
+#rm /opt/archive/pyrap/default
+#ln -s $PYRAP_TARGET /opt/archive/pyrap/default
+#rm /opt/archive/lofim/default
+#ln -s $LOFAR_TARGET /opt/archive/lofim/default
 
 echo "Done."
