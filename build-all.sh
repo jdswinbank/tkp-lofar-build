@@ -7,13 +7,15 @@ CASACORE_TARGET=$TARGET
 CASAREST_TARGET=$TARGET
 PYRAP_TARGET=$TARGET
 PYRAP_PYTHON_TARGET=$PYRAP_TARGET/lib/python2.6/dist-packages
-LOFAR_TARGET=$TARGET
+LOFAR_TARGET=$TARGET/lofim
+AWIMAGER_TARGET=$TARGET/awimager
 
 # Locations of checked-out source
 CASACOREROOT=$HOME/sources/casacore
 CASARESTROOT=$HOME/sources/casarest
 PYRAPROOT=$HOME/sources/pyrap
 LOFARROOT=$HOME/sources/LOFAR
+AWIMROOT=$HOME/sources/awimager/LOFAR
 
 # Base directory for local patches
 PATCHES=$(cd $(dirname "$0"); pwd)
@@ -135,20 +137,46 @@ make install
 check_result "LofIm" "make install" $TARGET $?
 echo "Built & installed LofIm r$LOFAR_VERSION."
 
+update_source "awimager" $AWIMROOT $AWIM_REVISION
+echo "Configuring awimager r$LOFAR_VERSION."
+# First update the list of available LOFAR packages
+$AWIMROOT/CMake/gen_LofarPackageList_cmake.sh
+mkdir -p $AWIMROOT/build/gnu_opt
+cd $AWIMROOT/build/gnu_opt
+cmake -DCASACORE_ROOT_DIR=$CASACORE_TARGET \
+    -DPYRAP_ROOT_DIR=$PYRAP_TARGET         \
+    -DWCSLIB_ROOT_DIR=$WCSLIBROOT          \
+    -DCASAREST_ROOT_DIR=$CASAREST_TARGET   \
+    -DBUILD_SHARED_LIBS=ON                 \
+    -DBUILD_PACKAGES=LofarFT               \
+    -DCMAKE_INSTALL_PREFIX=$AWIMAGER_TARGET \
+    -DUSE_LOG4CPLUS=OFF                    \
+    -DUSE_PQXX=OFF                         \
+    -DUSE_OPENMP=ON                        \
+    $AWIMROOT
+echo "Building awimager."
+make -j8
+check_result "awimager" "make" $TARGET $?
+echo "Installing awimager."
+make install
+check_result "awimager" "make install" $TARGET $?
+echo "Built & installed awimager r$LOFAR_VERSION."
+
+
 #echo "Copying cookbook tools to local host."
 #rsync -r lhn001:/opt/cep/tools/cookbook $TARGET
 #check_result "Cookbook tools" "rsync" $TARGET $?
 
-echo "Generating init.sh."
-INITFILE=$TARGET/init.sh
-cat > $INITFILE <<-END
-export LD_LIBRARY_PATH=$TARGET/lib\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}
-export PATH=$TARGET/bin\${PATH:+:\${PATH}}
-export PYTHONPATH=$TARGET/lib/python2.6/dist-packages\${PYTHONPATH:+:\${PYTHONPATH}}
-
-# LofIm
-. $LOFAR_TARGET/lofarinit.sh
-END
+#echo "Generating init.sh."
+#INITFILE=$TARGET/init.sh
+#cat > $INITFILE <<-END
+#export LD_LIBRARY_PATH=$TARGET/lib\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}
+#export PATH=$TARGET/bin\${PATH:+:\${PATH}}
+#export PYTHONPATH=$TARGET/lib/python2.6/dist-packages\${PYTHONPATH:+:\${PYTHONPATH}}
+#
+## LofIm
+#. $LOFAR_TARGET/lofarinit.sh
+#END
 
 ## Install this build as the default
 #rm /opt/archive/init.sh

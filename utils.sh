@@ -25,7 +25,7 @@ update_source() {
     echo "Updating $SOURCENAME sources."
     git clean -df
     git checkout -f master
-    git pull
+#    git pull
  #   git svn rebase
     if [ $REVISION ]
     then
