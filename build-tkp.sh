@@ -2,8 +2,10 @@
 
 # Target directory for installation
 BUILD_DATE=`date +%F-%H-%M`
-TARGET=/opt/tkp/${BUILD_DATE}
-echo "Installing into $TARGET"
+MASTER_TARGET=/opt/tkp/${BUILD_DATE}-master
+CYCLE0_TARGET=/opt/tkp/${BUILD_DATE}-cycle0
+echo "Installing master into ${MASTER_TARGET}"
+echo "Installing cycle0 into ${CYCLE0_TARGET}"
 
 TKP_SOURCE_DIR=/var/scratch/tkp
 TRAP_SOURCE_DIR=/var/scratch/trap
@@ -21,21 +23,28 @@ update_git_source() {
     git clean -dfx
     git checkout -f ${BRANCH}
     git pull
-    git tag daily-build-${BUILD_DATE}
+    git tag ${BRANCH}-daily-build-${BUILD_DATE}
 }
 
 build_and_install() {
     SOURCE=${1}
     DESTINATION=${2}
+    [ ${3} ] && BRANCH=${3} || BRANCH="master"
+
 
     cd ${SOURCE}
-    update_git_source
+    update_git_source ${BRANCH}
     mkdir build && cd build
     cmake -DCMAKE_INSTALL_PREFIX=${DESTINATION} ..
     make
     make install
 }
 
-build_and_install ${TKP_SOURCE_DIR} ${TARGET}
-build_and_install ${TRAP_SOURCE_DIR} ${TARGET}
-rm -f /opt/tkp/latest && ln -s ${TARGET} /opt/tkp/latest
+# On the current master, everythign is included in one repository
+build_and_install ${TKP_SOURCE_DIR} ${MASTER_TARGET} master
+rm -f /opt/tkp/latest && ln -s ${MASTER_TARGET} /opt/tkp/latest
+
+# But for cycle0, we need both the trap and tkp repositories
+build_and_install ${TKP_SOURCE_DIR} ${CYCLE0_TARGET} cycle0
+build_and_install ${TRAP_SOURCE_DIR} ${CYCLE0_TARGET} master
+rm -f /opt/tkp/cycle0 && ln -s ${CYCLE0_TARGET} /opt/tkp/cycle0
