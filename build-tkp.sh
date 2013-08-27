@@ -35,7 +35,7 @@ build_and_install() {
     cd ${SOURCE}
     update_git_source ${BRANCH}
     mkdir build && cd build
-    cmake -DCMAKE_INSTALL_PREFIX=${DESTINATION} ..
+    cmake -DCMAKE_INSTALL_PREFIX=${DESTINATION} -DPYTHON_PACKAGES_DIR=${DESTINATION}/lib/python2.7/site-packages/ ..
     make
     make install
 }
