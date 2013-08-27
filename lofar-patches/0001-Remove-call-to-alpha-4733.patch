@@ -1,0 +1,25 @@
+From 82be042074636fa07133b08cf5e8fa91a18cb317 Mon Sep 17 00:00:00 2001
+From: John Swinbank <j.swinbank@uva.nl>
+Date: Tue, 27 Aug 2013 15:06:12 +0200
+Subject: [PATCH] Remove call to alpha() (#4733)
+
+---
+ CEP/GSM/src/gsmutils.py |    2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/CEP/GSM/src/gsmutils.py b/CEP/GSM/src/gsmutils.py
+index 810d15e..f475921 100644
+--- a/CEP/GSM/src/gsmutils.py
++++ b/CEP/GSM/src/gsmutils.py
+@@ -639,8 +639,6 @@ def expected_fluxes_in_fov(conn, ra_central, decl_central, fov_radius,
+                               AND CAST(FLOOR(c1.decl + %(assoc_theta)s) AS INTEGER)
+                AND c2.decl BETWEEN c1.decl - %(assoc_theta)s
+                               AND c1.decl + %(assoc_theta)s
+-               AND c2.ra BETWEEN c1.ra - alpha(%(assoc_theta)s, c1.decl)
+-                             AND c1.ra + alpha(%(assoc_theta)s, c1.decl)
+                AND c2.x * c1.x + c2.y * c1.y + c2.z * c1.z > COS(RADIANS(%(assoc_theta)s))
+                AND SQRT(((c2.ra * COS(RADIANS(c2.decl)) - c1.ra * COS(RADIANS(c1.decl)))
+                         * (c2.ra * COS(RADIANS(c2.decl)) - c1.ra * COS(RADIANS(c1.decl)))
+-- 
+1.7.9.5
+
