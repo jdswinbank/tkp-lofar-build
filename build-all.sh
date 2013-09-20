@@ -150,6 +150,10 @@ echo "Copying cookbook tools to local host."
 rsync -r lhn001:/opt/cep/tools/cookbook $TARGET
 check_result "Cookbook tools" "rsync" $TARGET $?
 
+echo "Adding concat.py"
+wget https://raw.github.com/jdswinbank/msss/master/concat.py -O ${TARGET}/cookbook/concat.py
+chmod a+x ${TARGET}/cookbook/concat.py
+
 echo "Generating init.sh."
 INITFILE=$TARGET/init.sh
 cat > $INITFILE <<-END
