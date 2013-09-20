@@ -1,0 +1,24 @@
+From 56d3a674afdd47091bde8840f80e8e85c2517525 Mon Sep 17 00:00:00 2001
+From: John Swinbank <jds@pc-swinbank.science.uva.nl>
+Date: Fri, 20 Sep 2013 13:08:38 +0200
+Subject: [PATCH] Require boost_system to build DPPP
+
+---
+ CEP/DP3/DPPP/CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/CEP/DP3/DPPP/CMakeLists.txt b/CEP/DP3/DPPP/CMakeLists.txt
+index d016b93..cff781a 100644
+--- a/CEP/DP3/DPPP/CMakeLists.txt
++++ b/CEP/DP3/DPPP/CMakeLists.txt
+@@ -4,6 +4,7 @@ lofar_package(DPPP 1.0 DEPENDS Common MS AOFlagger ParmDB)
+ 
+ include(LofarFindPackage)
+ lofar_find_package(Casacore COMPONENTS casa ms tables REQUIRED)
++lofar_find_package(Boost REQUIRED COMPONENTS date_time thread filesystem system)
+ 
+ add_subdirectory(include/DPPP)
+ add_subdirectory(src)
+-- 
+1.8.4.rc3
+
