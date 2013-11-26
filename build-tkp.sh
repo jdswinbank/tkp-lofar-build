@@ -15,7 +15,7 @@ generate_initfile() {
 cat > $INITFILE <<-END
 export LD_LIBRARY_PATH=${DESTINATION}/lib\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}}
 export PATH=${DESTINATION}/bin\${PATH:+:\${PATH}}
-export PYTHONPATH=/opt/archive/python-monetdb/default/lib/python2.7/site-packages:\${DESTINATION}/lib/python2.7/site-packages\${PYTHONPATH:+:\${PYTHONPATH}}
+export PYTHONPATH=/opt/archive/python-monetdb/default/lib/python2.7/site-packages:${DESTINATION}/lib/python2.7/site-packages\${PYTHONPATH:+:\${PYTHONPATH}}
 END
 }
 
