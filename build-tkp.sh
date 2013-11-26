@@ -1,14 +1,40 @@
 #!/bin/bash
 
-# Target directory for installation
-BUILD_DATE=`date +%F-%H-%M`
-MASTER_TARGET=/opt/tkp/${BUILD_DATE}-master
-CYCLE0_TARGET=/opt/tkp/${BUILD_DATE}-cycle0
-echo "Installing master into ${MASTER_TARGET}"
-echo "Installing cycle0 into ${CYCLE0_TARGET}"
+# We want to build and install:
+#
+# - All tags into /opt/tkp/<tagname>/
+# - The HEAD of the master branch into /opt/tkp/nightly/[sha1]/
 
-TKP_SOURCE_DIR=/var/scratch/tkp
-TRAP_SOURCE_DIR=/var/scratch/trap
+SOURCE_DIR=/var/scratch/tkp
+TARGET_DIR=/opt/tkp
+
+generate_initfile() {
+    DESTINATION=${1}
+    INITFILE=${DESTINATION}/init.sh
+
+cat > $INITFILE <<-END
+export LD_LIBRARY_PATH=${DESTINATION}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+export PATH=${DESTINATION}/bin${PATH:+:${PATH}}
+export PYTHONPATH=/opt/archive/python-monetdb/default/lib/python2.7/site-packages:${DESTINATION}/lib/python2.7/site-packages${PYTHONPATH:+:${PYTHONPATH}}
+END
+}
+
+build_and_install() {
+    TREEISH=${1}
+    DESTINATION=${2}
+    if [ ! -e ${DESTINATION} ]
+    then
+        echo "Will build and install ${TREEISH} to ${DESTINATION}"
+        cd ${SOURCE_DIR}
+        git clean -dfx
+        git checkout ${TREEISH}
+        mkdir build && cd build
+        cmake -DCMAKE_INSTALL_PREFIX=${DESTINATION} -DPYTHON_PACKAGES_DIR=${DESTINATION}/lib/python2.7/site-packages/ ..
+        make
+        make install
+        generate_initfile ${DESTINATION}
+    fi
+}
 
 failure() {
     echo ${BASH_COMMAND} | mail -s "TKP build failure on heastro1" jds
@@ -17,34 +43,22 @@ failure() {
 
 trap failure ERR
 
-update_git_source() {
-    [ ${1} ] && BRANCH=${1} || BRANCH="master"
+# First, change to the source directory, clean up, and fetch the latest
+# version.
 
-    git clean -dfx
-    git checkout -f ${BRANCH}
-    git pull
-    git tag ${BRANCH}-daily-build-${BUILD_DATE}
-}
+cd ${SOURCE_DIR}
+git pull
 
-build_and_install() {
-    SOURCE=${1}
-    DESTINATION=${2}
-    [ ${3} ] && BRANCH=${3} || BRANCH="master"
+# Now we will build all the tags
+for tag in `git tag`
+do
+    DESTINATION=${TARGET_DIR}/${tag}
+    build_and_install ${tag} ${DESTINATION}
+done
 
-
-    cd ${SOURCE}
-    update_git_source ${BRANCH}
-    mkdir build && cd build
-    cmake -DCMAKE_INSTALL_PREFIX=${DESTINATION} -DPYTHON_PACKAGES_DIR=${DESTINATION}/lib/python2.7/site-packages/ ..
-    make
-    make install
-}
-
-# On the current master, everythign is included in one repository
-build_and_install ${TKP_SOURCE_DIR} ${MASTER_TARGET} master
-rm -f /opt/tkp/latest && ln -s ${MASTER_TARGET} /opt/tkp/latest
-
-# But for cycle0, we need both the trap and tkp repositories
-build_and_install ${TKP_SOURCE_DIR} ${CYCLE0_TARGET} cycle0
-build_and_install ${TRAP_SOURCE_DIR} ${CYCLE0_TARGET} master
-rm -f /opt/tkp/cycle0 && ln -s ${CYCLE0_TARGET} /opt/tkp/cycle0
+# Now the latest master
+cd ${SOURCE_DIR}
+latest_sha1=`git show --oneline -s master | cut -d\  -f1`
+DESTINATION=${TARGET_DIR}/nightly/${latest_sha1}
+build_and_install master ${DESTINATION}
+rm -f ${TARGET_DIR}/nightly/init.sh && ln -s ${DESTINATION}/init.sh ${TARGET_DIR}/nightly/init.sh
