@@ -47,6 +47,7 @@ trap failure ERR
 # version.
 
 cd ${SOURCE_DIR}
+git checkout master
 git pull
 
 # Now we will build all the tags
